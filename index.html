@@ -6,21 +6,21 @@
 <meta name="theme-color" content="#101f3d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="My Money">
+<meta name="apple-mobile-web-app-title" content="Budget-in">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>My Money — Your Money, Your Peace</title>
+<title>Budget-in — Personal Budget Manager</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app-shell">
 <header class="topbar">
-  <a class="brand" href="#" aria-label="My Money home"><span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 40 40"><defs><linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#91b9e8"/><stop offset="1" stop-color="#d9eadf"/></linearGradient></defs><rect x="2" y="2" width="36" height="36" rx="12" fill="url(#logoGrad)"/><path d="M10 25V15.5c0-2.2 3-3.1 4.3-1.3l5.7 7.2 5.7-7.2c1.3-1.8 4.3-.9 4.3 1.3V25" fill="none" stroke="#172747" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="30" cy="10" r="3" fill="#f0a47e"/></svg></span><span><b>my money</b><small>your money, your peace</small></span></a>
+  <a class="brand" href="#" aria-label="Budget-in home"><span class="brand-icon brand-budgetin" aria-hidden="true"><svg viewBox="0 0 44 44"><defs><linearGradient id="biGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9fc4ee"/><stop offset="1" stop-color="#b8dfcf"/></linearGradient></defs><rect x="2" y="2" width="40" height="40" rx="14" fill="url(#biGrad)"/><path d="M13 13h13a6 6 0 0 1 0 12H13zm0 12h15a6 6 0 0 1 0 12H13z" fill="none" stroke="#172747" stroke-width="2.7" stroke-linejoin="round"/><path d="M31 10l3 3-3 3" fill="none" stroke="#172747" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Budget-in</b></span></a>
   <div class="top-actions"><button class="round-btn theme-toggle" id="themeToggle" aria-label="Ganti tema" title="Ganti tema"><span id="themeIcon">☾</span></button><button class="round-btn" id="backupBtn" aria-label="Backup data" title="Backup data">↥</button></div>
 </header>
 <main class="main">
   <section class="welcome-row">
-    <div><div class="eyebrow">PERSONAL FINANCE SPACE</div><h1 id="monthTitle">November 2026</h1><p id="monthSubtitle">Pelan yang jelas. Pikiran lebih tenang.</p></div>
+    <div><div class="eyebrow">PERSONAL FINANCE SPACE</div><h1 id="monthTitle">November 2026</h1></div>
     <div class="month-arrows"><button id="prevMonth" aria-label="Bulan sebelumnya">‹</button><button id="nextMonth" aria-label="Bulan berikutnya">›</button></div>
   </section>
 
@@ -38,30 +38,18 @@
 
   <section class="quick-grid">
     <article class="mini-card"><span class="mini-icon peach">↗</span><span class="mini-label">Anggaran</span><b id="budgetCount">12 pos</b><small>kelola komitmen</small></article>
-    <article class="mini-card"><span class="mini-icon mint">◷</span><span class="mini-label">Daily minggu ini</span><b id="dailyStatus">Belum diisi</b><small id="dailySub">laporan mingguan</small></article>
+    <article class="mini-card"><span class="mini-icon mint">◷</span><span class="mini-label">Laporan mingguan</span><b id="dailyStatus">Belum diisi</b><small id="dailySub">anggaran aktif</small></article>
     <article class="mini-card"><span class="mini-icon lilac">⌁</span><span class="mini-label">Rata-rata Daily</span><b id="dailyAverage">Rp0</b><small>per minggu tercatat</small></article>
   </section>
 
   <section class="section-block" id="budgetSection">
-    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Atur nominal, ceklis terlaksana, dan pilih Cash atau Cashless.</p></div><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button></div>
+    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Atur pos, tandai terlaksana, dan pilih Cash atau Cashless.</p></div><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button></div>
     <div class="surface budget-surface"><div id="budgetList"></div><div class="budget-footer"><span>Total anggaran</span><b id="budgetTotal">Rp0</b></div><div class="cash-summary"><div><span>Uang tunai yang perlu disiapkan</span><b id="cashNeed">Rp0</b></div><small id="budgetState">Belum disubmit</small></div></div>
   </section>
 
-  <section class="section-block" id="dailySection">
-    <div class="section-heading"><div><span class="eyebrow">WEEKLY CHECK-IN</span><h2>Daily check-in</h2><p>Cukup isi total pemakaian selama seminggu.</p></div></div>
-    <div class="surface daily-surface">
-      <div class="week-head"><div><span class="soft-label dark">LAPORAN MINGGUAN</span><b id="weekLabel">Minggu 1</b></div><select id="weekSelect" aria-label="Pilih minggu"><option value="1">Minggu 1</option><option value="2">Minggu 2</option><option value="3">Minggu 3</option><option value="4">Minggu 4</option></select></div>
-      <div class="daily-total-row"><div><span>Total jatah</span><b id="weekBudget">Rp350.000</b></div><div><span>Terpakai</span><b id="weekSpent">Rp0</b></div><div><span id="weekResultLabel">Sisa</span><b id="weekResult">Rp350.000</b></div></div>
-      <div class="daily-fields">
-        <label><span><i class="dot dot-peach"></i>Jajan berdua <small>jatah Rp200.000</small></span><div class="money-input"><b>Rp</b><input id="spentTogether" type="number" min="0" inputmode="numeric" placeholder="0"></div></label>
-        <label><span><i class="dot dot-blue"></i>Bensin kerja <small>jatah Rp100.000</small></span><div class="money-input"><b>Rp</b><input id="spentFuel" type="number" min="0" inputmode="numeric" placeholder="0"></div></label>
-        <label><span><i class="dot dot-green"></i>Kopi / air PT <small>jatah Rp50.000</small></span><div class="money-input"><b>Rp</b><input id="spentWork" type="number" min="0" inputmode="numeric" placeholder="0"></div></label>
-      </div>
-      <div class="result-message" id="weeklyResult">Isi pemakaian Anda, lalu simpan laporan minggu ini.</div>
-      <button class="primary-btn full" id="saveWeek">Simpan laporan minggu <span>→</span></button>
-      <div class="history-title"><b>Perjalanan empat minggu</b><span>Jatah Rp350.000 / minggu</span></div>
-      <div class="week-track" id="weekHistory"></div>
-    </div>
+  <section class="section-block" id="weeklyBudgetSection">
+    <div class="section-heading"><div><span class="eyebrow">WEEKLY BUDGET</span><h2>Anggaran mingguan</h2><p>Bagian ini hanya tampil untuk pos yang diaktifkan pada pengaturan anggaran.</p></div></div>
+    <div id="weeklySections" class="weekly-sections"></div>
   </section>
 
   <section class="section-block" id="trendSection">
@@ -90,7 +78,7 @@
 <nav class="bottom-nav">
   <a href="#budgetSection" class="active"><span>⌂</span><small>Home</small></a>
   <a href="#budgetSection"><span>▤</span><small>Anggaran</small></a>
-  <a href="#dailySection"><span>◷</span><small>Daily</small></a>
+  <a href="#dailySection"><span>◷</span><small>Mingguan</small></a>
   <a href="#trendSection"><span>⌁</span><small>Tren</small></a>
   <a href="#historySection"><span>▦</span><small>Riwayat</small></a>
 </nav>

@@ -1,53 +1,29 @@
-# My Money V3 — Personal Finance Dashboard
+# Budget-in V3.3
 
-Aplikasi anggaran bulanan dan laporan Daily mingguan dengan tampilan mobile-first untuk iPhone/Safari.
+## Pembaruan
+- Rebranding My Money menjadi Budget-in, termasuk title, PWA name, dan icon.
+- Menghapus punchline pada header bulan.
+- Anggaran mingguan Jajan dan Bensin dipisah menjadi section mandiri.
+- Section mingguan hanya muncul jika pos diaktifkan sebagai pemantauan mingguan dan nominal mingguannya > 0.
+- Di pengaturan anggaran, tiap pos bisa diberi checkbox pemantauan mingguan dan nominal jatah per minggu.
+- Riwayat mingguan disimpan per pos anggaran; kompatibel dengan data V3.2 lama (together/fuel).
+- Riwayat bulanan, Cash/Cashless, checklist terlaksana, grafik tren, dan light/dark tetap dipertahankan.
 
-## Fitur
-- Edit nama dan nominal setiap pos anggaran; tambah/hapus pos.
-- Perubahan anggaran hanya berlaku pada bulan yang sedang dibuka.
-- Riwayat bulan sebelumnya tersimpan terpisah.
-- Laporan Daily mingguan: jajan berdua, bensin, kopi/air kerja.
-- Grafik tren anggaran, realisasi tercatat, dan sisa alokasi.
-- Status pos sudah dibayarkan/diberikan.
-- Saldo aktual ringkas dan backup/restore JSON.
-- PWA: dapat ditambahkan ke Home Screen iPhone dan aset dasar tersedia untuk offline setelah kunjungan pertama.
+## Deploy pembaruan ke GitHub
+1. Download dan ekstrak ZIP.
+2. Buka repository `ayyunnan/monthly-budget`.
+3. Klik Add file → Upload files.
+4. Upload seluruh isi folder Budget-in-V3.3 (file di root, jangan upload folder pembungkus).
+5. Commit changes, misalnya `Update Budget-in V3.3`.
+6. Buka Settings → Pages untuk memastikan deployment tetap `main` dan `/ (root)`.
+7. Refresh website. Jika tampilan lama masih tersimpan, lakukan hard refresh atau tutup lalu buka kembali PWA agar service worker V3.3 aktif.
 
-## Deploy ke GitHub Pages
-1. Buat repository GitHub baru.
-2. Upload seluruh isi folder ini ke root repository.
-3. Buka Settings → Pages.
-4. Pilih Deploy from a branch → `main` → `/ (root)` → Save.
-5. Buka URL Pages melalui Safari di iPhone.
+## Cara mengaktifkan Jajan/Bensin mingguan
+1. Buka Edit anggaran.
+2. Pada pos Jajan berdua, centang Pantau sebagai anggaran mingguan dan isi nominal mingguan.
+3. Pada pos Bensin kerja, lakukan hal yang sama.
+4. Simpan & submit.
+5. Section mingguan akan muncul terpisah. Jika checkbox dimatikan atau nominal mingguan 0, section terkait tidak ditampilkan.
 
-## Pasang di iPhone
-Buka website dari Safari → tombol Share/Bagikan → Add to Home Screen → Add.
-
-## Penyimpanan dan privasi
-Data tersimpan di localStorage browser/perangkat. Data tidak otomatis sinkron antara iPhone dan komputer. Gunakan Backup & pemulihan untuk ekspor/impor JSON. Untuk sinkronisasi cloud lintas perangkat dibutuhkan backend dan autentikasi, yang belum disertakan dalam versi ini.
-
-## Definisi grafik
-- Anggaran: total nominal pos anggaran bulan tersebut.
-- Realisasi tercatat: pos yang ditandai sudah dibayarkan/diberikan + pemakaian Daily dari laporan mingguan.
-- Belum dialokasikan: pemasukan dikurangi total anggaran.
-Grafik ini adalah ringkasan anggaran dan status realisasi, bukan mutasi rekening bank otomatis.
-
-## Catatan data
-Versi ini mencoba migrasi data dari localStorage My Money V2 (`mymoney_simple_v2`) pada browser yang sama. Untuk jaga-jaga, ekspor backup dari versi sebelumnya sebelum mengganti aplikasi.
-
-
-## UI update: Responsive Admin + Theme Switch
-- Desktop (>=1000px): fixed left navigation, wide admin dashboard layout, responsive cards and charts.
-- Mobile/iPhone: compact touch layout, bottom navigation and safe-area spacing.
-- Light/dark mode toggle in the top-right; preference persists in localStorage.
-- Updated custom My Money mark and PWA icons.
-- Existing budget, monthly history, weekly Daily report and backup data model remain unchanged.
-
-## Anggaran Cash / Cashless
-Setiap pos memiliki metode pembayaran Cash atau Cashless. Total semua pos bertanda Cash dijumlahkan otomatis sebagai kebutuhan uang tunai. Centang 'Sudah terlaksana/dibayarkan' untuk merekam realisasi anggaran. Tombol simpan pada editor bertindak sebagai submit/simpan anggaran, tetapi anggaran tetap dapat diedit dan ditambah kembali. Pemasukan/gaji dapat diubah per bulan.
-
-## Revisi V3.2 — pemasukan dan metode pembayaran
-- Pemasukan/gaji dapat diedit per bulan, termasuk ketika gaji berubah karena status pekerjaan.
-- Setiap pos anggaran memiliki status terlaksana dan pilihan metode Cash/Cashless.
-- Total kebutuhan tarik tunai otomatis menjumlahkan semua pos yang dipilih Cash.
-- Simpan & submit menyimpan anggaran bulan tersebut; anggaran tetap dapat dibuka dan diedit, termasuk tambah/hapus pos.
-- Riwayat bulan lain tidak berubah saat bulan aktif diedit.
+## Data dan kompatibilitas
+Aplikasi menggunakan localStorage browser. V3.3 memakai key data yang sama dengan V3.2 dan menormalkan format laporan mingguan lama. Backup JSON sebelum deployment tetap disarankan. Data tidak otomatis tersinkron antar perangkat.

@@ -15,7 +15,7 @@
 <body>
 <div class="app-shell">
 <header class="topbar">
-  <a class="brand" href="#" aria-label="Budget-in home"><span class="brand-icon brand-budgetin" aria-hidden="true"><svg viewBox="0 0 44 44"><defs><linearGradient id="biGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9fc4ee"/><stop offset="1" stop-color="#b8dfcf"/></linearGradient></defs><rect x="2" y="2" width="40" height="40" rx="14" fill="url(#biGrad)"/><path d="M13 13h13a6 6 0 0 1 0 12H13zm0 12h15a6 6 0 0 1 0 12H13z" fill="none" stroke="#172747" stroke-width="2.7" stroke-linejoin="round"/><path d="M31 10l3 3-3 3" fill="none" stroke="#172747" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Budget-in</b></span></a>
+  <a class="brand" href="#" aria-label="Budget-in home"><span class="brand-icon brand-budgetin" aria-hidden="true"><svg viewBox="0 0 44 44"><defs><linearGradient id="biGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a9c9ef"/><stop offset="1" stop-color="#bde3d1"/></linearGradient></defs><rect x="2" y="2" width="40" height="40" rx="14" fill="url(#biGrad)"/><path d="M13 13h13a6 6 0 0 1 0 12H13zm0 12h15a6 6 0 0 1 0 12H13z" fill="none" stroke="#172747" stroke-width="2.7" stroke-linejoin="round"/><path d="M31 10l3 3-3 3" fill="none" stroke="#172747" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Budget-in</b></span></a>
   <div class="top-actions"><button class="round-btn theme-toggle" id="themeToggle" aria-label="Ganti tema" title="Ganti tema"><span id="themeIcon">☾</span></button><button class="round-btn" id="backupBtn" aria-label="Backup data" title="Backup data">↥</button></div>
 </header>
 <main class="main">
@@ -38,17 +38,17 @@
 
   <section class="quick-grid">
     <article class="mini-card"><span class="mini-icon peach">↗</span><span class="mini-label">Anggaran</span><b id="budgetCount">12 pos</b><small>kelola komitmen</small></article>
-    <article class="mini-card"><span class="mini-icon mint">◷</span><span class="mini-label">Laporan mingguan</span><b id="dailyStatus">Belum diisi</b><small id="dailySub">anggaran aktif</small></article>
+    <article class="mini-card"><span class="mini-icon mint">◷</span><span class="mini-label">Laporan mingguan</span><b id="dailyStatus">Belum diisi</b><small id="dailySub">laporan mingguan</small></article>
     <article class="mini-card"><span class="mini-icon lilac">⌁</span><span class="mini-label">Rata-rata Daily</span><b id="dailyAverage">Rp0</b><small>per minggu tercatat</small></article>
   </section>
 
   <section class="section-block" id="budgetSection">
-    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Atur pos, tandai terlaksana, dan pilih Cash atau Cashless.</p></div><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button></div>
+    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Atur nominal, ceklis terlaksana, dan pilih Cash atau Cashless.</p></div><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button></div>
     <div class="surface budget-surface"><div id="budgetList"></div><div class="budget-footer"><span>Total anggaran</span><b id="budgetTotal">Rp0</b></div><div class="cash-summary"><div><span>Uang tunai yang perlu disiapkan</span><b id="cashNeed">Rp0</b></div><small id="budgetState">Belum disubmit</small></div></div>
   </section>
 
-  <section class="section-block" id="weeklyBudgetSection">
-    <div class="section-heading"><div><span class="eyebrow">WEEKLY BUDGET</span><h2>Anggaran mingguan</h2><p>Bagian ini hanya tampil untuk pos yang diaktifkan pada pengaturan anggaran.</p></div></div>
+  <section class="section-block" id="dailySection">
+    <div class="section-heading"><div><span class="eyebrow">WEEKLY CHECK-IN</span><h2>Anggaran mingguan</h2><p>Section hanya muncul untuk pos yang diaktifkan di pengaturan anggaran.</p></div></div>
     <div id="weeklySections" class="weekly-sections"></div>
   </section>
 
@@ -78,7 +78,7 @@
 <nav class="bottom-nav">
   <a href="#budgetSection" class="active"><span>⌂</span><small>Home</small></a>
   <a href="#budgetSection"><span>▤</span><small>Anggaran</small></a>
-  <a href="#dailySection"><span>◷</span><small>Mingguan</small></a>
+  <a href="#dailySection"><span>◷</span><small>Daily</small></a>
   <a href="#trendSection"><span>⌁</span><small>Tren</small></a>
   <a href="#historySection"><span>▦</span><small>Riwayat</small></a>
 </nav>

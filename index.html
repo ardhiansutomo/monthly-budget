@@ -13,14 +13,29 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="app-shell">
+<section id="authGate" class="auth-gate" hidden>
+  <div class="auth-card">
+    <div class="auth-brand"><img src="icon-192.png" alt="Budget-in"><div><b>Budget-in</b><small>Personal Finance Space</small></div></div>
+    <h1 id="authTitle">Masuk ke Budget-in</h1>
+    <p>Gunakan akun Anda untuk menyimpan dan menyinkronkan anggaran di seluruh perangkat.</p>
+    <form id="authForm">
+      <label>Email<input id="authEmail" type="email" autocomplete="email" required placeholder="nama@email.com"></label>
+      <label>Password<input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="Minimal 6 karakter"></label>
+      <button class="primary-btn full" id="authSubmit" type="submit">Masuk</button>
+    </form>
+    <button class="auth-switch" id="authSwitch" type="button">Belum punya akun? Daftar</button>
+    <div id="authMessage" class="auth-message" role="status"></div>
+    <small class="auth-footnote">Database pribadi dilindungi autentikasi dan kebijakan akses pengguna.</small>
+  </div>
+</section>
+<div class="app-shell" id="appShell">
 <header class="topbar">
-  <a class="brand" href="#" aria-label="Budget-in home"><span class="brand-icon brand-budgetin" aria-hidden="true"><svg viewBox="0 0 44 44"><defs><linearGradient id="biGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a9c9ef"/><stop offset="1" stop-color="#bde3d1"/></linearGradient></defs><rect x="2" y="2" width="40" height="40" rx="14" fill="url(#biGrad)"/><path d="M13 13h13a6 6 0 0 1 0 12H13zm0 12h15a6 6 0 0 1 0 12H13z" fill="none" stroke="#172747" stroke-width="2.7" stroke-linejoin="round"/><path d="M31 10l3 3-3 3" fill="none" stroke="#172747" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Budget-in</b></span></a>
-  <div class="top-actions"><button class="round-btn theme-toggle" id="themeToggle" aria-label="Ganti tema" title="Ganti tema"><span id="themeIcon">☾</span></button><button class="round-btn" id="backupBtn" aria-label="Backup data" title="Backup data">↥</button></div>
+  <a class="brand" href="#" aria-label="Budget-in home"><span class="brand-icon brand-budgetin" aria-hidden="true"><img src="icon-192.png" alt=""></span><span><b>Budget-in</b></span></a>
+  <div class="top-actions"><span id="syncStatus" class="sync-status">Offline</span><button class="round-btn account-btn" id="accountBtn" aria-label="Akun" title="Akun">☺</button><button class="round-btn theme-toggle" id="themeToggle" aria-label="Ganti tema" title="Ganti tema"><span id="themeIcon">☾</span></button><button class="round-btn" id="backupBtn" aria-label="Backup data" title="Backup data">↥</button></div>
 </header>
 <main class="main">
   <section class="welcome-row">
-    <div><div class="eyebrow">PERSONAL FINANCE SPACE</div><h1 id="monthTitle">November 2026</h1></div>
+    <div><div class="eyebrow">PERSONAL FINANCE SPACE</div><h1 id="monthTitle">November 2026</h1><div id="monthStatus" class="month-status">Draft</div></div>
     <div class="month-arrows"><button id="prevMonth" aria-label="Bulan sebelumnya">‹</button><button id="nextMonth" aria-label="Bulan berikutnya">›</button></div>
   </section>
 
@@ -43,7 +58,7 @@
   </section>
 
   <section class="section-block" id="budgetSection">
-    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Atur nominal, ceklis terlaksana, dan pilih Cash atau Cashless.</p></div><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button></div>
+    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Atur nominal, ceklis terlaksana, dan pilih Cash atau Cashless.</p></div><div class="heading-actions"><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button><button class="primary-btn submit-budget-btn" id="submitBudget">Submit anggaran</button></div></div>
     <div class="surface budget-surface"><div id="budgetList"></div><div class="budget-footer"><span>Total anggaran</span><b id="budgetTotal">Rp0</b></div><div class="cash-summary"><div><span>Uang tunai yang perlu disiapkan</span><b id="cashNeed">Rp0</b></div><small id="budgetState">Belum disubmit</small></div></div>
   </section>
 
@@ -84,5 +99,7 @@
 </nav>
 </div>
 <dialog id="modal"><form method="dialog" class="modal-card"><div class="modal-head"><div><span class="eyebrow">PERSONALIZE YOUR PLAN</span><h2 id="modalTitle">Edit anggaran</h2></div><button class="close-btn" value="cancel">×</button></div><div id="modalBody"></div><div class="modal-actions"><button class="secondary-btn" value="cancel">Batal</button><button class="primary-btn" id="modalSave" value="default">Simpan perubahan</button></div></form></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script src="app.js"></script>
 </body></html>

@@ -181,3 +181,54 @@
 .brand-budgetin{width:42px;height:42px;border-radius:13px;overflow:hidden;background:transparent}
 .brand-budgetin img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 @media(min-width:1000px){.brand-budgetin{width:46px;height:46px}.brand-budgetin img{width:46px;height:46px}}
+
+
+/* V3.5.1 mobile overflow hotfix — especially iPhone 14 Pro (393px). */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{min-width:0}
+.app-shell{width:100%;min-width:0;max-width:760px}
+.main,.topbar,.section-block,.surface{min-width:0;max-width:100%}
+.auth-gate{
+  width:100%;
+  max-width:100vw;
+  min-width:0;
+  box-sizing:border-box;
+  grid-template-columns:minmax(0,1fr);
+  padding:16px;
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+.auth-card{
+  display:block;
+  width:min(430px, calc(100vw - 32px));
+  min-width:0;
+  max-width:100%;
+  margin:0 auto;
+  box-sizing:border-box;
+  overflow-wrap:anywhere;
+}
+.auth-card *{min-width:0}
+.auth-card form,.auth-card form label{width:100%;max-width:100%}
+.auth-card form input{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+.auth-brand{min-width:0}
+.auth-brand>div{min-width:0}
+.auth-card h1{overflow-wrap:anywhere}
+@media(max-width:430px){
+  .auth-gate{padding:14px}
+  .auth-card{width:calc(100vw - 28px);padding:22px 20px;border-radius:21px}
+  .auth-brand img{width:48px;height:48px;flex:none}
+  .auth-card h1{font-size:22px}
+  .auth-card>p{font-size:11px}
+  .auth-card form input{padding:12px}
+}
+@media(max-width:360px){
+  .auth-card{padding:19px 16px}
+  .auth-brand{gap:9px}
+  .auth-brand b{font-size:17px}
+  .auth-card h1{font-size:20px}
+}

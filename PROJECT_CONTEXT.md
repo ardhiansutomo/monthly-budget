@@ -32,3 +32,7 @@ Baseline: user-supplied V3.4 files; V3.5 builds on that implementation.
 
 ## Source files
 `index.html`, `styles.css`, `app.js`, `sw.js`, `manifest.webmanifest`, `config.js`, `schema.sql`, `icon-192.png`, `icon-512.png`, `README.md`, `CHANGELOG.md`.
+
+## V3.5.1 hotfix
+- Supabase URL and publishable key filled from user-provided project details.
+- Authentication card constrained to viewport width to fix mobile horizontal overflow.

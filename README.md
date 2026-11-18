@@ -10,6 +10,10 @@
 - Editing a submitted month overwrites its current saved record, as selected by the owner.
 - Existing V3.4 localStorage data is imported on first login if the cloud account has no budgets; when cloud data exists, only missing local months are imported.
 
+## V3.5.1 hotfix
+- `config.js` is prefilled with the Supabase Project URL derived from the dashboard link and the publishable key supplied in the conversation. If Supabase still reports a network/DNS error, copy the Project URL directly from Project Overview and compare it character-for-character with `config.js`.
+- Authentication gate layout has been constrained to the viewport to prevent horizontal clipping on narrow mobile screens.
+
 ## Setup Supabase
 
 **Cloud connection is not active until you fill `config.js` with your own project URL and publishable/anon key.** The supplied package intentionally contains blank credentials; no live Supabase project or credentials were provided in this conversation.

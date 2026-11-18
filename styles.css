@@ -232,3 +232,188 @@ body{min-width:0}
   .auth-brand b{font-size:17px}
   .auth-card h1{font-size:20px}
 }
+
+
+/* ─────────────────────────────────────────────────────────────
+   Budget-in V3.5.2 HOTFIX
+   Desktop width restoration + adaptive dashboard grid + icon system
+   ───────────────────────────────────────────────────────────── */
+.material-symbols-rounded{
+  font-family:'Material Symbols Rounded';
+  font-weight:normal;
+  font-style:normal;
+  font-size:22px;
+  line-height:1;
+  letter-spacing:normal;
+  text-transform:none;
+  display:inline-flex;
+  white-space:nowrap;
+  direction:ltr;
+  -webkit-font-feature-settings:'liga';
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:'liga';
+  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+  align-items:center;
+  justify-content:center;
+}
+.top-actions .round-btn{display:inline-flex;align-items:center;justify-content:center}
+.top-actions .material-symbols-rounded{font-size:21px}
+.bottom-nav a .material-symbols-rounded{font-size:21px}
+.bottom-nav a small{letter-spacing:.1px}
+.account-btn{border:1px solid var(--line)}
+.account-btn:hover,.round-btn:hover{background:var(--nav-soft);box-shadow:0 4px 14px #17274712}
+.heading-actions{gap:9px}
+.submit-budget-btn{min-height:38px}
+.month-arrows button{transition:all .18s ease}
+.month-arrows button:hover{background:var(--nav-soft);border-color:#cbd8e8;transform:translateY(-1px)}
+/* The mobile hotfix previously capped the whole shell at 760px.
+   Restore full viewport width on desktop while preserving the tablet cap. */
+@media(min-width:1000px){
+  html,body{width:100%;min-width:0;overflow-x:hidden}
+  .app-shell{
+    width:100%;
+    max-width:none!important;
+    min-width:0;
+    margin:0;
+    padding:0 0 44px 252px;
+    border-radius:0;
+    overflow:visible;
+    box-shadow:none;
+  }
+  .topbar{
+    position:fixed;
+    left:252px;
+    right:0;
+    top:0;
+    width:auto;
+    height:76px;
+    padding:0 clamp(24px,3vw,52px);
+    border-radius:0;
+    z-index:30;
+  }
+  .main{
+    width:100%;
+    max-width:1600px;
+    min-width:0;
+    margin:0 auto;
+    padding:108px clamp(24px,3vw,52px) 55px;
+  }
+  .bottom-nav{
+    left:0;
+    top:0;
+    bottom:0;
+    transform:none;
+    width:252px;
+    height:100vh;
+    padding:112px 17px 25px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    gap:7px;
+    border-top:0;
+    border-right:1px solid var(--line);
+    z-index:25;
+  }
+  .bottom-nav a{min-height:48px;flex-direction:row;justify-content:flex-start;gap:13px;padding:0 13px;border-radius:12px;font-size:18px}
+  .bottom-nav a .material-symbols-rounded{font-size:21px}
+}
+/* Desktop dashboard: balanced use of wide screens, no narrow left-only column. */
+@media(min-width:1280px){
+  .main{
+    display:grid;
+    grid-template-columns:repeat(12,minmax(0,1fr));
+    align-content:start;
+    align-items:start;
+    column-gap:24px;
+    row-gap:28px;
+  }
+  .welcome-row{grid-column:1/-1;width:100%;margin:0 0 0}
+  .balance-card{grid-column:span 8;min-width:0;min-height:230px}
+  .quick-grid{
+    grid-column:span 4;
+    display:grid;
+    grid-template-columns:1fr;
+    align-content:stretch;
+    gap:12px;
+    margin:0;
+    min-width:0;
+  }
+  .quick-grid .mini-card{
+    display:grid;
+    grid-template-columns:44px minmax(0,1fr);
+    grid-template-rows:auto auto;
+    column-gap:12px;
+    align-content:center;
+    align-items:center;
+    min-height:66px;
+    padding:12px 16px;
+  }
+  .quick-grid .mini-icon{grid-row:1/3;margin:0;width:38px;height:38px}
+  .quick-grid .mini-label{align-self:end;font-size:10px}
+  .quick-grid .mini-card b{align-self:start;font-size:16px;margin:2px 0}
+  .quick-grid .mini-card small{grid-column:2;font-size:9px}
+  #budgetSection{grid-column:span 7;min-width:0}
+  #dailySection{grid-column:span 5;min-width:0}
+  #trendSection{grid-column:span 7;min-width:0}
+  #historySection{grid-column:span 5;min-width:0}
+  .main>section.section-block:last-of-type{grid-column:1/-1;min-width:0}
+  .install-hint{grid-column:1/-1}
+  .section-block{margin:0;min-width:0}
+  .budget-surface,.trend-surface,.history-surface{min-width:0}
+  .wallet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .weekly-sections{grid-template-columns:1fr}
+  .weekly-card{min-width:0}
+}
+/* Medium desktop and landscape tablets: full width, comfortable single-column flow. */
+@media(min-width:1000px) and (max-width:1279px){
+  .main{max-width:1120px;padding-left:30px;padding-right:30px}
+  .balance-card{max-width:none}
+  .quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .section-block{width:100%}
+}
+/* Tablet and phones: retain compact navigation and prevent horizontal clipping. */
+@media(max-width:999px){
+  .app-shell{width:100%;max-width:760px;margin:0 auto;padding-bottom:96px}
+  .main{width:100%;max-width:100%;padding-left:clamp(14px,4vw,24px);padding-right:clamp(14px,4vw,24px)}
+  .topbar{width:100%;max-width:100%}
+  .bottom-nav{width:100%;max-width:760px}
+}
+@media(min-width:600px) and (max-width:999px){
+  .quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .weekly-sections{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:599px){
+  .topbar{height:62px;padding-left:14px;padding-right:14px}
+  .brand-budgetin{width:38px;height:38px}
+  .brand b{font-size:15px}
+  .top-actions{gap:6px}
+  .top-actions .round-btn{width:34px;height:34px}
+  .top-actions .material-symbols-rounded{font-size:19px}
+  .sync-status{max-width:86px;overflow:hidden;text-overflow:ellipsis}
+  .welcome-row h1{font-size:clamp(21px,6vw,26px)}
+  .balance-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .balance-grid span{font-size:8px}
+  .balance-grid b{font-size:clamp(9px,2.8vw,12px);overflow-wrap:anywhere}
+  .quick-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .mini-card{padding:10px 8px;min-width:0}
+  .mini-card b{font-size:11px}
+  .section-heading{align-items:flex-start}
+  .section-heading>div:first-child{min-width:0}
+  .section-heading p{line-height:1.45}
+  .heading-actions{width:auto;flex-direction:column;align-items:stretch}
+  .heading-actions>*{flex:initial}
+  .submit-budget-btn{font-size:9px;padding:9px}
+  .wallet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .wallet-card{padding:9px;min-width:0}
+  .wallet-card b{font-size:11px;overflow-wrap:anywhere}
+  .bottom-nav{padding-left:5px;padding-right:5px}
+  .bottom-nav a{font-size:16px}
+  .bottom-nav a .material-symbols-rounded{font-size:20px}
+  .bottom-nav a small{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+.budget-icon.material-symbols-rounded,.weekly-icon.material-symbols-rounded{font-size:19px;font-variation-settings:'FILL' 0,'wght' 450,'GRAD' 0,'opsz' 20}
+@media(min-width:1280px){#balancesSection{grid-column:1/-1}}

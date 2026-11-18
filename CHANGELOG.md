@@ -23,3 +23,12 @@
 - Fixed authentication card horizontal overflow on narrow viewports, including iPhone 14 Pro width (393px).
 - Added explicit min-width/max-width constraints to auth form, inputs, app shell and page containers.
 - Kept mobile login card centered with safe viewport-based sizing.
+
+## V3.5.2 — Desktop layout and responsive UI hotfix
+- Fixed desktop shell width regression caused by the V3.5.1 global 760px max-width rule.
+- Restored full-width desktop workspace with fixed 252px sidebar and full-width topbar.
+- Added 12-column desktop dashboard composition for wide displays (1280px and above).
+- Kept medium desktop/tablet in a comfortable single-column layout and mobile navigation below 1000px.
+- Added Material Symbols Rounded icons for account, theme, backup, navigation and budget categories.
+- Added explicit balance section grid placement and responsive typography/spacing.
+- Bumped service-worker cache to `budget-in-v3.5.2-cache`.

@@ -36,3 +36,9 @@ Baseline: user-supplied V3.4 files; V3.5 builds on that implementation.
 ## V3.5.1 hotfix
 - Supabase URL and publishable key filled from user-provided project details.
 - Authentication card constrained to viewport width to fix mobile horizontal overflow.
+
+## V3.5.2 UI hotfix
+- Restored full desktop width; previous V3.5.1 global max-width caused a 760px shell cap on desktop.
+- Wide desktop uses a 12-column grid; medium desktop/tablet uses single-column flow; mobile retains bottom navigation.
+- Material Symbols Rounded icons added for common controls and categories.
+- Service worker cache key: `budget-in-v3.5.2-cache`.

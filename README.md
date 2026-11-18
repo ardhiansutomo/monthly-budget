@@ -48,3 +48,9 @@ Serve the folder over HTTP (not `file://`) because Supabase Auth and the service
 - Browser localStorage is retained as a local cache and first-login migration source. Cloud sync requires a working internet connection.
 - Supabase free-plan limits and email delivery settings depend on the project configuration.
 - Run a backup from the existing V3.4 app before replacing the production deployment.
+
+## V3.5.2 UI hotfix
+- Desktop app shell now expands across the available viewport beside the 252px sidebar.
+- Wide desktop dashboard uses a 12-column grid; tablet and mobile retain responsive layouts.
+- Material Symbols Rounded icon set used for navigation, account, backup, theme and category icons.
+- Service worker cache updated to V3.5.2.

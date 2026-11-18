@@ -54,3 +54,17 @@ Serve the folder over HTTP (not `file://`) because Supabase Auth and the service
 - Wide desktop dashboard uses a 12-column grid; tablet and mobile retain responsive layouts.
 - Material Symbols Rounded icon set used for navigation, account, backup, theme and category icons.
 - Service worker cache updated to V3.5.2.
+
+## V3.6 — Password recovery setup (required)
+In Supabase Dashboard:
+1. Open Authentication → URL Configuration.
+2. Set Site URL to `https://ayyunnan.github.io/monthly-budget/`.
+3. Add this exact Redirect URL: `https://ayyunnan.github.io/monthly-budget/?auth=reset`.
+4. In Authentication → Email Templates, ensure the Reset Password template uses the Supabase confirmation URL (`{{ .ConfirmationURL }}`) or the current default recovery link.
+5. Keep Email provider enabled.
+
+In the app, the user selects **Lupa password?**, enters their account email, opens the email link, creates and confirms a new password, and is returned to the login screen after the password is updated.
+
+Password visibility is available through the eye icon beside password fields. Passwords are never displayed unless the user explicitly toggles visibility.
+
+**Email delivery note:** Actual delivery depends on the Supabase project's SMTP/email provider configuration and spam filtering. The app only requests the recovery email; it cannot guarantee inbox delivery.

@@ -42,3 +42,11 @@ Baseline: user-supplied V3.4 files; V3.5 builds on that implementation.
 - Wide desktop uses a 12-column grid; medium desktop/tablet uses single-column flow; mobile retains bottom navigation.
 - Material Symbols Rounded icons added for common controls and categories.
 - Service worker cache key: `budget-in-v3.5.2-cache`.
+
+## V3.6 — Account recovery
+- Forgot Password uses Supabase `resetPasswordForEmail` and redirects to `https://ayyunnan.github.io/monthly-budget/?auth=reset`.
+- Recovery page validates new password (minimum 8 chars) and confirmation, then calls `auth.updateUser({password})`.
+- On success, signs out, clears recovery URL, and returns to sign-in.
+- Password visibility toggle available on login, registration and reset forms.
+- Supabase Auth URL Configuration must allow the exact GitHub Pages redirect URL.
+- Service worker cache: `budget-in-v3.6-cache`.

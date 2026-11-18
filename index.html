@@ -21,11 +21,34 @@
     <p>Gunakan akun Anda untuk menyimpan dan menyinkronkan anggaran di seluruh perangkat.</p>
     <form id="authForm">
       <label>Email<input id="authEmail" type="email" autocomplete="email" required placeholder="nama@email.com"></label>
-      <label>Password<input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="Minimal 6 karakter"></label>
+      <label id="loginPasswordLabel">Password
+        <span class="password-field">
+          <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="Masukkan password">
+          <button class="password-toggle" type="button" data-toggle-password="authPassword" aria-label="Tampilkan password" aria-pressed="false"><span class="material-symbols-rounded">visibility</span></button>
+        </span>
+      </label>
+      <button class="forgot-link" id="forgotPassword" type="button">Lupa password?</button>
       <button class="primary-btn full" id="authSubmit" type="submit">Masuk</button>
     </form>
+    <form id="recoveryForm" hidden>
+      <p class="recovery-instruction">Buat password baru untuk akun Budget-in Anda. Gunakan minimal 8 karakter.</p>
+      <label>Password baru
+        <span class="password-field">
+          <input id="newPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="Password baru">
+          <button class="password-toggle" type="button" data-toggle-password="newPassword" aria-label="Tampilkan password" aria-pressed="false"><span class="material-symbols-rounded">visibility</span></button>
+        </span>
+      </label>
+      <label>Konfirmasi password
+        <span class="password-field">
+          <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="Ulangi password baru">
+          <button class="password-toggle" type="button" data-toggle-password="confirmPassword" aria-label="Tampilkan password" aria-pressed="false"><span class="material-symbols-rounded">visibility</span></button>
+        </span>
+      </label>
+      <button class="primary-btn full" id="saveNewPassword" type="submit">Simpan password baru</button>
+      <button class="auth-switch" id="cancelRecovery" type="button">Kembali ke login</button>
+    </form>
     <button class="auth-switch" id="authSwitch" type="button">Belum punya akun? Daftar</button>
-    <div id="authMessage" class="auth-message" role="status"></div>
+    <div id="authMessage" class="auth-message" role="status" aria-live="polite"></div>
     <small class="auth-footnote">Database pribadi dilindungi autentikasi dan kebijakan akses pengguna.</small>
   </div>
 </section>

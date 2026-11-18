@@ -417,3 +417,67 @@ body{min-width:0}
 
 .budget-icon.material-symbols-rounded,.weekly-icon.material-symbols-rounded{font-size:19px;font-variation-settings:'FILL' 0,'wght' 450,'GRAD' 0,'opsz' 20}
 @media(min-width:1280px){#balancesSection{grid-column:1/-1}}
+
+
+/* ── V3.6 Account recovery and password visibility ── */
+.password-field{
+  display:flex;
+  align-items:center;
+  width:100%;
+  min-width:0;
+  position:relative;
+  margin-top:7px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--field);
+  overflow:hidden;
+}
+.auth-card form .password-field input{
+  flex:1 1 auto;
+  width:0;
+  min-width:0;
+  max-width:none;
+  margin:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  padding:13px 12px 13px 14px;
+}
+.auth-card form .password-field input:focus{border:0;box-shadow:none}
+.password-field:focus-within{border-color:#86a9d5;box-shadow:0 0 0 3px #a9c9ef35}
+.password-toggle{
+  flex:0 0 44px;
+  width:44px;
+  height:44px;
+  border:0;
+  background:transparent;
+  color:#75839a;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  border-radius:9px;
+}
+.password-toggle:hover{background:var(--nav-soft);color:var(--navy)}
+.password-toggle .material-symbols-rounded{font-size:21px}
+.forgot-link{
+  display:block;
+  border:0;
+  background:transparent;
+  color:#6387b8;
+  font:700 11px 'DM Sans';
+  padding:0;
+  margin:-2px 0 14px auto;
+  cursor:pointer;
+}
+.forgot-link:hover,.auth-switch:hover{text-decoration:underline}
+.forgot-link:disabled{opacity:.55;cursor:wait}
+.recovery-instruction{font-size:11px;line-height:1.6;color:var(--muted);margin:0 0 16px}
+#recoveryForm label{display:block;font-size:11px;font-weight:700;margin:13px 0;color:var(--ink)}
+#recoveryForm .primary-btn{margin-top:12px;padding:14px}
+#recoveryForm[hidden],#authForm[hidden],#authSwitch[hidden],#forgotPassword[hidden]{display:none!important}
+@media(max-width:430px){
+ .password-toggle{flex-basis:42px;width:42px;height:42px}
+ .auth-card form .password-field input{padding:12px}
+}

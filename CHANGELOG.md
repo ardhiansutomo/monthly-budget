@@ -32,3 +32,14 @@
 - Added Material Symbols Rounded icons for account, theme, backup, navigation and budget categories.
 - Added explicit balance section grid placement and responsive typography/spacing.
 - Bumped service-worker cache to `budget-in-v3.5.2-cache`.
+
+## V3.6 — Account Recovery & Authentication Upgrade
+- Added Forgot Password action on the sign-in screen.
+- Added Supabase `resetPasswordForEmail()` flow with a dedicated recovery redirect.
+- Added password recovery screen with new-password and confirmation fields.
+- Added password update through Supabase Auth `updateUser({ password })`.
+- After successful reset, the app signs out and returns to the sign-in screen with a success message.
+- Added show/hide password controls for sign-in, sign-up and password recovery fields.
+- Added validation for minimum 8-character recovery password and matching confirmation.
+- Corrected Supabase Project URL to match the project reference in the user's dashboard URL.
+- Bumped service-worker cache to `budget-in-v3.6-cache`.

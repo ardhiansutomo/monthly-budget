@@ -80,7 +80,11 @@ let supabaseClient=null,authMode='signin',cloudReady=false,saveQueue=Promise.res
 const setSync=(label,kind='')=>{const el=$('syncStatus');if(el){el.textContent=label;el.className='sync-status '+kind;}};
 function showAuth(message=''){const gate=$('authGate');if(gate){gate.hidden=false;$('appShell').classList.add('app-locked');$('authMessage').textContent=message;}}
 function hideAuth(){const gate=$('authGate');if(gate){gate.hidden=true;$('appShell').classList.remove('app-locked');}}
-function setAuthMode(mode){authMode=mode;$('authTitle').textContent=mode==='signup'?'Buat akun Budget-in':'Masuk ke Budget-in';$('authSubmit').textContent=mode==='signup'?'Daftar':'Masuk';$('authSwitch').textContent=mode==='signup'?'Sudah punya akun? Masuk':'Belum punya akun? Daftar';$('authPassword').autocomplete=mode==='signup'?'new-password':'current-password';}
+let recoveryMode=false;
+function setAuthMode(mode){authMode=mode;$('authTitle').textContent=mode==='signup'?'Buat akun Budget-in':'Masuk ke Budget-in';$('authSubmit').textContent=mode==='signup'?'Daftar':'Masuk';$('authSwitch').textContent=mode==='signup'?'Sudah punya akun? Masuk':'Belum punya akun? Daftar';$('authPassword').autocomplete=mode==='signup'?'new-password':'current-password';$('forgotPassword').hidden=mode!=='signin';$('loginPasswordLabel').hidden=false;$('authForm').hidden=false;$('recoveryForm').hidden=true;$('authSwitch').hidden=false;} 
+function showRecoveryForm(message='Tautan pemulihan diterima. Silakan buat password baru.'){recoveryMode=true;$('authTitle').textContent='Atur ulang password';$('authForm').hidden=true;$('authSwitch').hidden=true;$('recoveryForm').hidden=false;$('authMessage').textContent=message;showAuth(message);}
+function clearRecoveryUrl(){history.replaceState({},document.title,location.pathname);}
+
 async function cloudSaveMonth(k,m){
  if(!supabaseClient)return;
  const payload={user_id:(await supabaseClient.auth.getUser()).data.user.id,month_key:k,status:m.status||(m.submitted?'submitted':'draft'),data:m,submitted_at:m.submittedAt||null,updated_at:new Date().toISOString()};
@@ -122,18 +126,79 @@ async function submitCurrentBudget(){
 $('submitBudget')?.addEventListener('click',submitCurrentBudget);
 $('accountBtn')?.addEventListener('click',async()=>{if(!supabaseClient)return;const {data}=await supabaseClient.auth.getUser();if(data?.user){if(confirm(`Login sebagai ${data.user.email}.\nKeluar dari akun Budget-in?`)){await supabaseClient.auth.signOut();cloudReady=false;setSync('Keluar');showAuth('Anda telah keluar. Masuk kembali untuk mengakses data cloud.');}}else showAuth();});
 $('authSwitch')?.addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));
+$('forgotPassword')?.addEventListener('click',async()=>{
+ if(!supabaseClient){$('authMessage').textContent='Koneksi Supabase belum tersedia.';return;}
+ const email=$('authEmail').value.trim();
+ if(!email){$('authMessage').textContent='Masukkan email akun Anda terlebih dahulu.';$('authEmail').focus();return;}
+ $('forgotPassword').disabled=true;$('authMessage').textContent='Mengirim tautan pemulihan…';
+ try{
+  const redirectTo=location.origin+location.pathname+'?auth=reset';
+  const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
+  if(error)throw error;
+  $('authMessage').textContent='Jika email terdaftar, tautan pemulihan telah dikirim. Periksa Inbox dan folder Spam.';
+ }catch(err){$('authMessage').textContent=err.message||'Gagal mengirim email pemulihan.';}
+ finally{$('forgotPassword').disabled=false;}
+});
 $('authForm')?.addEventListener('submit',async e=>{
- e.preventDefault();if(!supabaseClient){$('authMessage').textContent='Supabase belum dikonfigurasi. Isi URL dan publishable/anon key pada config.js.';return;}
+ e.preventDefault();if(!supabaseClient){$('authMessage').textContent='Supabase belum dikonfigurasi. Periksa config.js.';return;}
  const email=$('authEmail').value.trim(),password=$('authPassword').value;$('authSubmit').disabled=true;$('authMessage').textContent='Memproses…';
  try{
-  if(authMode==='signup'){const {data,error}=await supabaseClient.auth.signUp({email,password});if(error)throw error;if(!data.session){$('authMessage').textContent='Pendaftaran berhasil. Periksa email untuk verifikasi, lalu masuk.';}else await syncAllMonths();}
-  else{const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;await syncAllMonths();}
+  if(authMode==='signup'){
+   const {data,error}=await supabaseClient.auth.signUp({email,password});if(error)throw error;
+   if(!data.session){$('authMessage').textContent='Pendaftaran berhasil. Periksa email untuk verifikasi sebelum masuk.';}
+   else await syncAllMonths();
+  }else{
+   const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)throw error;await syncAllMonths();
+  }
  }catch(err){$('authMessage').textContent=err.message||'Autentikasi gagal.';}finally{$('authSubmit').disabled=false;}
 });
+$('recoveryForm')?.addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!supabaseClient){$('authMessage').textContent='Koneksi Supabase belum tersedia.';return;}
+ const password=$('newPassword').value,confirmPassword=$('confirmPassword').value;
+ if(password.length<8){$('authMessage').textContent='Password baru minimal 8 karakter.';return;}
+ if(password!==confirmPassword){$('authMessage').textContent='Konfirmasi password tidak sama.';return;}
+ $('saveNewPassword').disabled=true;$('authMessage').textContent='Menyimpan password baru…';
+ try{
+  const {data:{session}}=await supabaseClient.auth.getSession();
+  if(!session)throw new Error('Sesi pemulihan tidak ditemukan atau tautan sudah kedaluwarsa. Minta tautan reset baru.');
+  const {error}=await supabaseClient.auth.updateUser({password});if(error)throw error;
+  await supabaseClient.auth.signOut();cloudReady=false;recoveryMode=false;clearRecoveryUrl();
+  $('newPassword').value='';$('confirmPassword').value='';
+  setAuthMode('signin');showAuth('Password berhasil diperbarui. Silakan masuk menggunakan password baru.');
+  setSync('Belum login');
+ }catch(err){$('authMessage').textContent=err.message||'Gagal memperbarui password.';}
+ finally{$('saveNewPassword').disabled=false;}
+});
+$('cancelRecovery')?.addEventListener('click',async()=>{
+ recoveryMode=false;clearRecoveryUrl();if(supabaseClient)await supabaseClient.auth.signOut();
+ setAuthMode('signin');showAuth('Silakan masuk dengan password akun Anda.');setSync('Belum login');
+});
+document.addEventListener('click',e=>{
+ const button=e.target.closest('[data-toggle-password]');if(!button)return;
+ const input=$(button.dataset.togglePassword);if(!input)return;
+ const visible=input.type==='password';input.type=visible?'text':'password';
+ button.setAttribute('aria-pressed',String(visible));
+ button.setAttribute('aria-label',visible?'Sembunyikan password':'Tampilkan password');
+ const symbol=button.querySelector('.material-symbols-rounded');if(symbol)symbol.textContent=visible?'visibility_off':'visibility';
+});
 async function bootCloud(){
- if(!BI_CONFIG.url||!BI_CONFIG.anonKey||!window.supabase?.createClient){setSync('Perlu konfigurasi','error');showAuth('Supabase belum dikonfigurasi. Lengkapi config.js dan jalankan SQL schema yang disertakan.');return;}
+ const params=new URLSearchParams(location.search);
+ const hashParams=new URLSearchParams(location.hash.replace(/^#/,''));
+ const recoveryRequested=params.get('auth')==='reset'||hashParams.get('type')==='recovery';
+ if(!BI_CONFIG.url||!BI_CONFIG.anonKey||!window.supabase?.createClient){setSync('Perlu konfigurasi','error');showAuth('Supabase belum dikonfigurasi. Periksa config.js.');return;}
  supabaseClient=window.supabase.createClient(BI_CONFIG.url,BI_CONFIG.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
- const {data:{session}}=await supabaseClient.auth.getSession();
+ supabaseClient.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){showRecoveryForm('Tautan pemulihan valid. Buat password baru untuk akun Anda.');}
+ });
+ const {data:{session},error}=await supabaseClient.auth.getSession();
+ if(error)throw error;
+ if(recoveryRequested){
+  if(session)showRecoveryForm('Tautan pemulihan diterima. Buat password baru untuk melanjutkan.');
+  else showRecoveryForm('Sesi pemulihan belum tersedia. Pastikan tautan email belum kedaluwarsa, lalu coba lagi.');
+  setSync('Pemulihan password');
+  return;
+ }
  if(session){try{await syncAllMonths();}catch(e){console.error(e);showAuth('Gagal memuat database: '+e.message);setSync('Database error','error');}}
  else{showAuth();setSync('Belum login');}
 }

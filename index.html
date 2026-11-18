@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#101f3d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
 <meta name="apple-mobile-web-app-title" content="Budget-in">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -92,12 +94,12 @@
   </section>
 
   <section class="section-block" id="trendSection">
-    <div class="section-heading"><div><span class="eyebrow">SEE YOUR PROGRESS</span><h2>Tren keuangan</h2><p>Bandingkan bulan-bulan yang sudah disimpan.</p></div><select id="trendRange" class="range-select"><option value="6">6 bulan</option><option value="12">12 bulan</option></select></div>
+    <div class="section-heading"><div><span class="eyebrow">SEE YOUR PROGRESS</span><h2>Tren keuangan</h2><p>Pantau perubahan anggaran, realisasi, dan uang yang belum dialokasikan.</p></div><select id="trendRange" class="range-select"><option value="6">6 bulan</option><option value="12">12 bulan</option></select></div>
     <div class="surface trend-surface">
-      <div class="trend-legend"><span><i class="legend-dot navy"></i>Anggaran</span><span><i class="legend-dot green"></i>Realisasi tercatat</span><span><i class="legend-dot peach"></i>Belum dialokasikan</span></div>
+      <div class="trend-legend"><span><i class="legend-dot navy"></i>Anggaran</span><span><i class="legend-dot green"></i>Realisasi</span><span><i class="legend-dot peach"></i>Uang bebas</span></div>
       <div id="trendChart" class="chart-area" role="img" aria-label="Grafik tren keuangan bulanan"></div>
       <div id="trendSummary" class="trend-summary"></div>
-      <p class="chart-note">Realisasi tercatat dihitung dari pos yang ditandai sudah dibayarkan/diberikan ditambah pemakaian Daily mingguan. Tandai status pembayaran dengan benar agar grafik akurat.</p>
+      <p class="chart-note">Grafik menggunakan data yang sudah tersimpan pada setiap bulan. Realisasi merupakan angka tercatat dari checklist pembayaran dan laporan mingguan; data yang belum lengkap dapat membuat perbandingan bersifat sementara.</p>
     </div>
   </section>
 
@@ -122,6 +124,22 @@
   <a href="#historySection"><span class="material-symbols-rounded">history</span><small>Riwayat</small></a>
 </nav>
 </div>
+<dialog id="accountDialog" class="account-dialog">
+  <div class="account-dialog-card">
+    <div class="account-dialog-head">
+      <div><span class="eyebrow">BUDGET-IN ACCOUNT</span><h2>Pengaturan akun</h2></div>
+      <button class="close-btn" id="closeAccountDialog" type="button" aria-label="Tutup">×</button>
+    </div>
+    <div class="account-profile">
+      <span class="account-avatar material-symbols-rounded">account_circle</span>
+      <div><b>Budget-in</b><small id="accountEmail">Akun tersambung</small></div>
+    </div>
+    <button class="account-action" id="accountThemeAction" type="button"><span class="material-symbols-rounded" id="accountThemeIcon">dark_mode</span><span><b id="accountThemeLabel">Aktifkan Dark Mode</b><small>Ubah tampilan aplikasi</small></span><span class="material-symbols-rounded action-chevron">chevron_right</span></button>
+    <button class="account-action" id="accountBackupAction" type="button"><span class="material-symbols-rounded">cloud_upload</span><span><b>Backup & pemulihan</b><small>Ekspor atau pulihkan data</small></span><span class="material-symbols-rounded action-chevron">chevron_right</span></button>
+    <button class="account-action account-logout" id="accountLogoutAction" type="button"><span class="material-symbols-rounded">logout</span><span><b>Keluar dari akun</b><small>Logout Budget-in pada perangkat ini</small></span><span class="material-symbols-rounded action-chevron">chevron_right</span></button>
+    <p class="account-dialog-note">Pengaturan tema disimpan pada perangkat ini. Data anggaran tetap tersimpan di akun Supabase.</p>
+  </div>
+</dialog>
 <dialog id="modal"><form method="dialog" class="modal-card"><div class="modal-head"><div><span class="eyebrow">PERSONALIZE YOUR PLAN</span><h2 id="modalTitle">Edit anggaran</h2></div><button class="close-btn" value="cancel">×</button></div><div id="modalBody"></div><div class="modal-actions"><button class="secondary-btn" value="cancel">Batal</button><button class="primary-btn" id="modalSave" value="default">Simpan perubahan</button></div></form></dialog>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>

@@ -55,7 +55,60 @@ $('weeklySections').addEventListener('click',e=>{let btn=e.target.closest('[data
 window.togglePaid=(id,v)=>{let b=current().budgets.find(x=>x.id===id);if(b)b.paid=v;persist();};
 function renderHistory(){let keys=Object.keys(state.months).sort().reverse();$('monthHistory').innerHTML=keys.map(k=>{let m=state.months[k];return `<div class="month-row ${k===month?'current':''}"><div><b>${monthName(k)}</b><small>Pemasukan ${fmt(m.income)} · Realisasi tercatat ${fmt(actual(m))}</small></div><div style="text-align:right"><b>${fmt(m.income-totalBudget(m))}</b><small>Belum dialokasikan</small></div><button onclick="openMonth('${k}')">${k===month?'Aktif':'Lihat'}</button></div>`}).join('');}
 window.openMonth=k=>{month=k;week=1;persist();window.scrollTo({top:0,behavior:'smooth'});};
-function renderTrend(){let count=+$('trendRange').value||6,keys=Object.keys(state.months).sort().slice(-count),vals=keys.map(k=>{let m=state.months[k];return {k,alloc:totalBudget(m),actual:actual(m),free:m.income-totalBudget(m)};});if(!vals.length){$('trendChart').innerHTML='<p>Belum ada data.</p>';return;}let max=Math.max(1,...vals.flatMap(v=>[v.alloc,v.actual,v.free])),W=620,H=175,left=8,right=8,top=12,bottom=28,innerH=H-top-bottom,step=(W-left-right)/vals.length,bw=Math.min(22,step*.22),y=v=>top+innerH-(v/max)*innerH;let svg=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">`;for(let i=0;i<4;i++){let yy=top+i*innerH/3;svg+=`<line x1="${left}" y1="${yy}" x2="${W-right}" y2="${yy}" stroke="currentColor" opacity=".12" stroke-dasharray="3 4"/>`;}vals.forEach((v,i)=>{let cx=left+step*i+step/2;[{v:v.alloc,c:'#243b60',dx:-bw-2},{v:v.actual,c:'#4da486',dx:0},{v:v.free,c:'#efad89',dx:bw+2}].forEach(b=>{let yy=y(b.v),hh=top+innerH-yy;svg+=`<rect x="${cx+b.dx-bw/2}" y="${yy}" width="${bw}" height="${Math.max(1,hh)}" rx="4" fill="${b.c}"/>`;});svg+=`<text x="${cx}" y="${H-8}" text-anchor="middle" font-size="10" fill="currentColor">${monthName(v.k).slice(0,3)}</text>`;});svg+='</svg>';$('trendChart').innerHTML=svg;let avg=vals.reduce((a,v)=>a+v.actual,0)/vals.length,last=vals.at(-1);$('trendSummary').innerHTML=`<div class="trend-kpi"><small>Rata-rata realisasi tercatat</small><b>${fmt(avg)}</b></div><div class="trend-kpi"><small>Belum dialokasikan bulan ini</small><b>${fmt(last.free)}</b></div>`;}
+function renderTrend(){
+ const count=+$('trendRange').value||6;
+ const keys=Object.keys(state.months).sort().slice(-count);
+ const vals=keys.map(k=>{const m=state.months[k];return {k,alloc:totalBudget(m),actual:actual(m),free:(+m.income||0)-totalBudget(m)};});
+ const host=$('trendChart');
+ if(!vals.length){host.innerHTML='<div class="chart-empty"><span class="material-symbols-rounded">insert_chart</span><b>Belum ada data tren</b><small>Simpan anggaran bulanan untuk mulai melihat perkembangan.</small></div>';$('trendSummary').innerHTML='';return;}
+ const W=760,H=270,L=66,R=22,T=20,B=42,plotW=W-L-R,plotH=H-T-B;
+ const all=vals.flatMap(v=>[v.alloc,v.actual,v.free]);
+ let min=Math.min(0,...all),max=Math.max(1,...all);
+ if(max===min)max=min+1;
+ const pad=(max-min)*.12;min-=pad;max+=pad;
+ const x=i=>L+(vals.length===1?plotW/2:i*plotW/(vals.length-1));
+ const y=v=>T+(max-v)/(max-min)*plotH;
+ const compact=v=>new Intl.NumberFormat('id-ID',{notation:'compact',maximumFractionDigits:1}).format(v);
+ const series=[
+  {key:'alloc',name:'Anggaran',color:'#304a70',width:3},
+  {key:'actual',name:'Realisasi',color:'#45a184',width:3.5},
+  {key:'free',name:'Uang bebas',color:'#e9a17c',width:3}
+ ];
+ let svg=`<svg class="trend-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Grafik garis tren anggaran, realisasi, dan uang bebas selama ${vals.length} bulan"><defs><linearGradient id="actualArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#45a184" stop-opacity=".22"/><stop offset="100%" stop-color="#45a184" stop-opacity="0"/></linearGradient></defs>`;
+ for(let i=0;i<5;i++){
+  const value=min+(max-min)*i/4,yy=y(value);
+  svg+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" class="chart-gridline"/>`;
+  svg+=`<text x="${L-10}" y="${yy+4}" text-anchor="end" class="chart-axis-label">${escapeHtml(compact(value))}</text>`;
+ }
+ if(min<=0&&max>=0){svg+=`<line x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}" class="chart-zero-line"/>`;}
+ const actualPoints=vals.map((v,i)=>`${x(i)},${y(v.actual)}`).join(' ');
+ if(vals.length>1){
+  const area=`M ${x(0)} ${y(vals[0].actual)} `+vals.slice(1).map((v,i)=>`L ${x(i+1)} ${y(v.actual)}`).join(' ')+` L ${x(vals.length-1)} ${T+plotH} L ${x(0)} ${T+plotH} Z`;
+  svg+=`<path d="${area}" fill="url(#actualArea)"/>`;
+ }
+ series.forEach(s=>{
+  const points=vals.map((v,i)=>`${x(i)},${y(v[s.key])}`).join(' ');
+  if(vals.length>1)svg+=`<polyline points="${points}" fill="none" stroke="${s.color}" stroke-width="${s.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  vals.forEach((v,i)=>{
+   const cx=x(i),cy=y(v[s.key]),label=`${monthName(v.k)} — ${s.name}: ${fmt(v[s.key])}`;
+   svg+=`<circle cx="${cx}" cy="${cy}" r="5" fill="${s.color}" stroke="var(--chart-point-stroke)" stroke-width="2"><title>${escapeHtml(label)}</title></circle>`;
+  });
+ });
+ vals.forEach((v,i)=>{
+  const label=monthName(v.k).split(' ')[0].slice(0,3);
+  svg+=`<text x="${x(i)}" y="${H-13}" text-anchor="middle" class="chart-month-label">${escapeHtml(label)}</text>`;
+ });
+ svg+='</svg>';
+ host.innerHTML=svg;
+ const avg=vals.reduce((a,v)=>a+v.actual,0)/vals.length,last=vals[vals.length-1];
+ const delta=vals.length>1?last.actual-vals[vals.length-2].actual:null;
+ const deltaText=delta===null?'Butuh data bulan lain':`${delta>0?'+':delta<0?'−':''}${fmt(Math.abs(delta))} dari bulan sebelumnya`;
+ $('trendSummary').innerHTML=`
+  <div class="trend-kpi"><small>Rata-rata realisasi</small><b>${fmt(avg)}</b><em>Selama ${vals.length} bulan</em></div>
+  <div class="trend-kpi"><small>Realisasi bulan terakhir</small><b>${fmt(last.actual)}</b><em>${escapeHtml(deltaText)}</em></div>
+  <div class="trend-kpi"><small>Uang bebas terencana</small><b>${fmt(last.free)}</b><em>${last.free<0?'Alokasi melebihi pemasukan':'Sisa setelah alokasi'}</em></div>`;
+}
+
 $('trendRange').onchange=renderTrend;
 $('prevMonth').onclick=()=>shiftMonth(-1);$('nextMonth').onclick=()=>shiftMonth(1);
 function shiftMonth(n){let [y,m]=month.split('-').map(Number),d=new Date(y,m-1+n,1);month=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;week=1;persist();}
@@ -69,6 +122,7 @@ $('backupBtn').onclick=()=>showModal('Backup & pemulihan',`<p class="modal-help"
 $('modalBody').addEventListener('click',e=>{if(e.target.id==='exportBackup'){let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='budget-in-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}});
 $('modalBody').addEventListener('change',async e=>{if(e.target.id==='importBackup'){try{let s=JSON.parse(await e.target.files[0].text());if(!s.months)throw Error();state=s;month=state.activeMonth||Object.keys(s.months).sort().at(-1);persist();$('modal').close();}catch{alert('Backup tidak valid.');}}});
 $('dismissHint').onclick=()=>{$('installHint').remove();localStorage.setItem('budgetin_install_dismissed','1');};if(localStorage.getItem('budgetin_install_dismissed'))$('installHint').remove();
+if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true){$('installHint')?.remove();}
 document.querySelectorAll('.bottom-nav a').forEach(a=>a.addEventListener('click',()=>{document.querySelectorAll('.bottom-nav a').forEach(x=>x.classList.remove('active'));a.classList.add('active');}));
 const THEME_KEY='mymoney_theme_v1';function applyTheme(t){document.documentElement.dataset.theme=t;localStorage.setItem(THEME_KEY,t);let icon=$('themeIcon');if(icon)icon.textContent=t==='dark'?'light_mode':'dark_mode';let meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t==='dark'?'#0c1422':'#101f3d';}
 applyTheme(localStorage.getItem(THEME_KEY)||'light');$('themeToggle')?.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
@@ -124,7 +178,49 @@ async function submitCurrentBudget(){
  else alert('Anggaran tersimpan lokal. Login dan konfigurasi Supabase diperlukan untuk penyimpanan cloud.');
 }
 $('submitBudget')?.addEventListener('click',submitCurrentBudget);
-$('accountBtn')?.addEventListener('click',async()=>{if(!supabaseClient)return;const {data}=await supabaseClient.auth.getUser();if(data?.user){if(confirm(`Login sebagai ${data.user.email}.\nKeluar dari akun Budget-in?`)){await supabaseClient.auth.signOut();cloudReady=false;setSync('Keluar');showAuth('Anda telah keluar. Masuk kembali untuk mengakses data cloud.');}}else showAuth();});
+async function openAccountDialog(){
+ if(!supabaseClient){showAuth('Koneksi akun belum tersedia.');return;}
+ const {data,error}=await supabaseClient.auth.getUser();
+ if(error||!data?.user){showAuth('Silakan masuk kembali ke akun Budget-in.');return;}
+ $('accountEmail').textContent=data.user.email||'Akun Budget-in';
+ const dark=document.documentElement.dataset.theme==='dark';
+ $('accountThemeLabel').textContent=dark?'Aktifkan Light Mode':'Aktifkan Dark Mode';
+ $('accountThemeIcon').textContent=dark?'light_mode':'dark_mode';
+ const logout=$('accountLogoutAction');logout.dataset.confirm='no';
+ logout.querySelector('b').textContent='Keluar dari akun';
+ logout.querySelector('small').textContent='Logout Budget-in pada perangkat ini';
+ $('accountDialog').showModal();
+}
+$('accountBtn')?.addEventListener('click',openAccountDialog);
+$('closeAccountDialog')?.addEventListener('click',()=>$('accountDialog').close());
+$('accountDialog')?.addEventListener('click',e=>{if(e.target===$('accountDialog'))$('accountDialog').close();});
+$('accountThemeAction')?.addEventListener('click',()=>{
+ const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
+ applyTheme(next);
+ $('accountThemeLabel').textContent=next==='dark'?'Aktifkan Light Mode':'Aktifkan Dark Mode';
+ $('accountThemeIcon').textContent=next==='dark'?'light_mode':'dark_mode';
+});
+$('accountBackupAction')?.addEventListener('click',()=>{$('accountDialog').close();$('backupBtn').click();});
+$('accountLogoutAction')?.addEventListener('click',async()=>{
+ const button=$('accountLogoutAction');
+ if(button.dataset.confirm!=='yes'){
+  button.dataset.confirm='yes';
+  button.querySelector('b').textContent='Ketuk sekali lagi untuk keluar';
+  button.querySelector('small').textContent='Konfirmasi logout dari akun ini';
+  return;
+ }
+ button.disabled=true;
+ try{
+  const {error}=await supabaseClient.auth.signOut();
+  if(error)throw error;
+  cloudReady=false;
+  setAuthMode('signin');
+  $('accountDialog').close();
+  setSync('Keluar');
+  showAuth('Anda telah keluar. Masuk kembali untuk mengakses data cloud.');
+ }catch(err){alert('Logout gagal: '+err.message);}
+ finally{button.disabled=false;button.dataset.confirm='no';}
+});
 $('authSwitch')?.addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));
 $('forgotPassword')?.addEventListener('click',async()=>{
  if(!supabaseClient){$('authMessage').textContent='Koneksi Supabase belum tersedia.';return;}

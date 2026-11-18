@@ -1,4 +1,4 @@
-const CACHE='budget-in-v3.6-cache';
+const CACHE='budget-in-v3.7-cache';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
@@ -13,6 +13,13 @@ self.addEventListener('fetch',event=>{
   if(request.method!=='GET')return;
   const url=new URL(request.url);
   if(url.origin!==self.location.origin)return;
+  if(url.pathname.endsWith('/config.js')){
+    event.respondWith(fetch(request,{cache:'no-store'}).then(async response=>{
+      if(response.ok){const cache=await caches.open(CACHE);cache.put(request,response.clone());}
+      return response;
+    }).catch(()=>caches.match(request)));
+    return;
+  }
   event.respondWith((async()=>{
     const cached=await caches.match(request);
     if(cached)return cached;

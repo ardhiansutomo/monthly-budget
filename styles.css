@@ -481,3 +481,101 @@ body{min-width:0}
  .password-toggle{flex-basis:42px;width:42px;height:42px}
  .auth-card form .password-field input{padding:12px}
 }
+
+
+/* ── Budget-in V3.7: chart, account sheet and iOS standalone polish ── */
+:root{--chart-point-stroke:#fff;--chart-label:#8c97a9;--chart-grid:#dfe5ed}
+:root[data-theme="dark"]{--chart-point-stroke:#151f30;--chart-label:#a8b5c8;--chart-grid:#34445b}
+.trend-surface{padding:clamp(15px,2vw,24px)}
+.trend-legend{display:flex;align-items:center;gap:16px;margin:2px 0 12px}
+.trend-legend span{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:600}
+.legend-dot{width:9px;height:9px;border-radius:50%;margin:0;flex:none}
+.legend-dot.navy{background:#304a70}.legend-dot.green{background:#45a184}.legend-dot.peach{background:#e9a17c}
+.chart-area{height:clamp(210px,26vw,290px);margin:8px 0 12px;overflow:hidden}
+.chart-area .trend-svg{display:block;width:100%;height:100%;overflow:visible}
+.chart-gridline{stroke:var(--chart-grid);stroke-width:1;stroke-dasharray:3 6;opacity:.9}
+.chart-zero-line{stroke:var(--chart-label);stroke-width:1;stroke-dasharray:4 4;opacity:.65}
+.chart-axis-label,.chart-month-label{fill:var(--chart-label);font-family:'DM Sans',sans-serif;font-size:11px}
+.chart-month-label{font-size:11px;font-weight:700}
+.trend-svg circle{transition:r .15s ease,filter .15s ease}
+.trend-svg circle:hover{r:7;filter:drop-shadow(0 2px 4px #15243b30)}
+.trend-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.trend-kpi{padding:13px 14px;border:1px solid var(--line);background:var(--surface-soft);border-radius:13px;min-width:0}
+.trend-kpi small{font-size:10px;line-height:1.4}
+.trend-kpi b{font:800 clamp(12px,1.2vw,16px) Manrope;overflow-wrap:anywhere;letter-spacing:-.2px}
+.trend-kpi em{display:block;margin-top:5px;color:var(--muted);font-size:9px;font-style:normal;line-height:1.4}
+.chart-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--muted);text-align:center}
+.chart-empty .material-symbols-rounded{font-size:32px;opacity:.6}
+.chart-empty b{font:700 13px Manrope;color:var(--ink)}
+.chart-empty small{font-size:10px}
+.chart-note{font-size:10px;line-height:1.6;padding-top:11px;border-top:1px solid var(--line)}
+/* Account dialog: native dialog stays usable in iOS standalone/PWA. */
+.account-dialog{
+  width:min(430px,calc(100vw - 28px));
+  max-width:calc(100vw - 28px);
+  max-height:min(82vh,680px);
+  padding:0;
+  margin:auto;
+  border:1px solid var(--line);
+  border-radius:22px;
+  color:var(--ink);
+  background:var(--surface);
+  box-shadow:0 24px 80px #09162b35;
+  overflow:auto;
+}
+.account-dialog::backdrop{background:rgba(12,24,43,.55);backdrop-filter:blur(5px)}
+.account-dialog-card{padding:22px}
+.account-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.account-dialog-head h2{font:800 19px Manrope;margin:4px 0 0}
+.account-profile{display:flex;align-items:center;gap:12px;padding:13px;background:var(--surface-soft);border:1px solid var(--line);border-radius:14px;margin-bottom:12px}
+.account-avatar{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:var(--nav-soft);color:var(--navy);font-size:27px}
+.account-profile b{display:block;font:800 13px Manrope}
+.account-profile small{display:block;color:var(--muted);font-size:10px;margin-top:3px;overflow-wrap:anywhere}
+.account-action{width:100%;display:grid;grid-template-columns:34px minmax(0,1fr) 20px;align-items:center;gap:11px;padding:13px 10px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);text-align:left;cursor:pointer;border-radius:10px}
+.account-action>.material-symbols-rounded{font-size:21px;color:var(--muted)}
+.account-action b{display:block;font:700 11px 'DM Sans'}
+.account-action small{display:block;color:var(--muted);font-size:9px;margin-top:3px;line-height:1.4}
+.account-action .action-chevron{font-size:19px}
+.account-action:hover{background:var(--surface-soft)}
+.account-action.account-logout{color:#b45e50}
+.account-action.account-logout>.material-symbols-rounded{color:#b45e50}
+.account-action:disabled{opacity:.5}
+.account-dialog-note{font-size:9px;color:var(--muted);line-height:1.5;margin:15px 2px 0}
+:root[data-theme="dark"] .account-dialog{background:#151f30;border-color:var(--line)}
+:root[data-theme="dark"] .account-profile{background:#1b293d}
+:root[data-theme="dark"] .account-avatar{background:#26364e;color:#dce7f6}
+:root[data-theme="dark"] .account-action:hover{background:#1b293d}
+/* iOS Add to Home Screen safe areas and reliable action visibility. */
+@supports(padding:max(0px)){
+  body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  .topbar{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+  .bottom-nav{padding-bottom:max(10px,env(safe-area-inset-bottom))}
+}
+@media(max-width:430px){
+  .topbar{height:64px;padding-left:12px;padding-right:12px;gap:8px}
+  .brand{gap:7px;flex:0 1 auto;min-width:0}
+  .brand-budgetin{width:36px;height:36px;flex:none}
+  .brand b{font-size:14px;white-space:nowrap}
+  .top-actions{display:flex;flex:0 0 auto;gap:5px;margin-left:auto;align-items:center}
+  .top-actions .sync-status{display:none}
+  .top-actions .round-btn{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 34px;width:34px;height:34px;min-width:34px}
+  .top-actions .round-btn .material-symbols-rounded{font-size:19px}
+  .account-dialog{width:calc(100vw - 28px);max-height:calc(100dvh - 36px)}
+  .account-dialog-card{padding:19px}
+  .trend-summary{grid-template-columns:1fr}
+  .trend-kpi{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 10px}
+  .trend-kpi small{grid-column:1}
+  .trend-kpi b{grid-column:2;grid-row:1/3;text-align:right}
+  .trend-kpi em{grid-column:1}
+}
+@media(min-width:431px) and (max-width:999px){
+  .top-actions{gap:7px}
+  .top-actions .round-btn{width:36px;height:36px;flex:none}
+}
+@media(prefers-reduced-motion:no-preference){
+  .account-dialog[open]{animation:biRise .22s ease-out}
+  .account-action{transition:background .16s ease,transform .16s ease}
+  .account-action:active{transform:scale(.99)}
+  .trend-kpi{transition:transform .18s ease,box-shadow .18s ease}
+  .trend-kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+}

@@ -50,3 +50,12 @@ Baseline: user-supplied V3.4 files; V3.5 builds on that implementation.
 - Password visibility toggle available on login, registration and reset forms.
 - Supabase Auth URL Configuration must allow the exact GitHub Pages redirect URL.
 - Service worker cache: `budget-in-v3.6-cache`.
+
+## V3.7 — Trend & iOS PWA usability
+- Responsive line chart with budget, recorded actual, and planned free-money series.
+- Account dialog contains theme switch, backup shortcut, and two-step logout confirmation.
+- Direct topbar theme control remains.
+- iOS safe-area insets for standalone display.
+- Standalone PWA hides Add to Home Screen hint.
+- Supabase config retained from user's confirmed working config.
+- Service worker cache: `budget-in-v3.7-cache`.

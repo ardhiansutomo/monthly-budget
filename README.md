@@ -68,3 +68,11 @@ In the app, the user selects **Lupa password?**, enters their account email, ope
 Password visibility is available through the eye icon beside password fields. Passwords are never displayed unless the user explicitly toggles visibility.
 
 **Email delivery note:** Actual delivery depends on the Supabase project's SMTP/email provider configuration and spam filtering. The app only requests the recovery email; it cannot guarantee inbox delivery.
+
+## V3.7 — Trend & iOS PWA usability
+- Trend chart now shows three responsive line series: monthly allocation, recorded actual and planned free money. Hover/tap chart points for their values. Three KPIs summarize average actual, latest actual and planned free money.
+- On iPhone/iOS Home Screen, use the account-circle button in the top-right to open **Pengaturan akun**. This sheet includes theme switch, backup and logout. The direct theme button also remains in the topbar.
+- Logout uses an in-app two-step confirmation rather than `window.confirm`, improving reliability in standalone PWA mode.
+- iOS safe-area insets are applied to the topbar and bottom navigation.
+- The install hint is hidden when already running as an installed PWA.
+- Existing Supabase project URL and publishable key are preserved in `config.js`.

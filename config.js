@@ -3,6 +3,6 @@
  * Never put a service_role key or database password in this file.
  */
 window.BUDGETIN_SUPABASE = {
-  url: 'https://ooompnudzdnbtbyraszu.supabase.co',
+  url: 'https://ooompnudzdnbtyraszu.supabase.co',
   anonKey: 'sb_publishable_6JdXevVMXCzHCP_a8JCqGQ_i2J0lUag'
 };

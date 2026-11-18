@@ -43,3 +43,18 @@
 - Added validation for minimum 8-character recovery password and matching confirmation.
 - Corrected Supabase Project URL to match the project reference in the user's dashboard URL.
 - Bumped service-worker cache to `budget-in-v3.6-cache`.
+
+## V3.7 — Trend & iOS PWA usability upgrade
+- Rebuilt financial trend visualization as a responsive multi-series line chart with an actual-spending area, grid, compact value axis, point tooltips and three summary KPIs.
+- Added an account/settings dialog accessible from the account icon.
+- Added reliable in-app theme control, backup shortcut and two-step logout confirmation inside the account dialog, avoiding reliance on browser-native confirm dialogs in iOS standalone mode.
+- Kept direct theme toggle in the topbar and forced action controls to remain visible on narrow iPhone widths.
+- Added iOS safe-area handling for topbar and bottom navigation.
+- Refined mobile header spacing and hid the sync label on narrow screens to preserve room for action buttons.
+- Hid the install hint when the app is already running in standalone/PWA mode.
+- Preserved Supabase URL and publishable key from the user's confirmed working configuration.
+- Bumped service-worker cache to `budget-in-v3.7-cache`.
+
+## Release packaging
+- Full package: `Budget-in-V3.7-FULL.zip`.
+- Existing Supabase configuration retained as supplied by the user and confirmed working.

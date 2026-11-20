@@ -579,3 +579,49 @@ body{min-width:0}
   .trend-kpi{transition:transform .18s ease,box-shadow .18s ease}
   .trend-kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 }
+
+
+/* ── V3.8 Smart Refresh & iOS safe-area experience ── */
+.refresh-btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);cursor:pointer}
+.refresh-btn:disabled{opacity:.65;cursor:wait}
+.refresh-btn .material-symbols-rounded{font-size:20px}
+.is-refreshing{animation:biRefreshSpin .8s linear infinite}
+@keyframes biRefreshSpin{to{transform:rotate(360deg)}}
+@media(max-width:999px){
+  /* iOS standalone/PWA: reserve the physical status-bar + Dynamic Island area. */
+  .topbar{
+    box-sizing:border-box;
+    height:calc(64px + env(safe-area-inset-top, 0px));
+    min-height:calc(64px + env(safe-area-inset-top, 0px));
+    padding-top:env(safe-area-inset-top, 0px);
+    padding-left:max(12px,env(safe-area-inset-left,0px));
+    padding-right:max(12px,env(safe-area-inset-right,0px));
+    top:0;
+  }
+  .bottom-nav{
+    padding-bottom:calc(9px + env(safe-area-inset-bottom,0px));
+    min-height:calc(66px + env(safe-area-inset-bottom,0px));
+  }
+  html{scroll-padding-top:calc(82px + env(safe-area-inset-top,0px))}
+  .main{padding-top:clamp(22px,4vw,30px)}
+}
+@media(max-width:430px){
+  .topbar{gap:6px}
+  .brand{gap:6px}
+  .brand-budgetin{width:35px;height:35px}
+  .brand b{font-size:13px}
+  .top-actions{gap:4px}
+  .top-actions .round-btn{flex:0 0 33px;width:33px;height:33px;min-width:33px}
+  .top-actions .round-btn .material-symbols-rounded{font-size:18px}
+  .main{padding-top:25px}
+  .welcome-row{align-items:flex-start;gap:8px}
+  .welcome-row h1{line-height:1.16}
+  .month-arrows button{width:38px;height:38px}
+  .balance-card{border-radius:23px}
+  .quick-grid{gap:8px}
+  .mini-card{border-radius:17px;min-height:132px}
+}
+@media(min-width:431px) and (max-width:999px){
+  .topbar{height:calc(68px + env(safe-area-inset-top,0px));min-height:calc(68px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px)}
+}
+@media(prefers-reduced-motion:reduce){.is-refreshing{animation:none}}

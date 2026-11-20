@@ -131,6 +131,8 @@ if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addE
 // ── Budget-in V3.5: Supabase authentication and cloud persistence ──
 const BI_CONFIG=window.BUDGETIN_SUPABASE||{};
 let supabaseClient=null,authMode='signin',cloudReady=false,saveQueue=Promise.resolve();
+let realtimeChannel=null,cloudRefreshInFlight=false,lastCloudRefreshAt=0,realtimeRefreshTimer=null;
+const monthMutationVersion=new Map();
 const setSync=(label,kind='')=>{const el=$('syncStatus');if(el){el.textContent=label;el.className='sync-status '+kind;}};
 function showAuth(message=''){const gate=$('authGate');if(gate){gate.hidden=false;$('appShell').classList.add('app-locked');$('authMessage').textContent=message;}}
 function hideAuth(){const gate=$('authGate');if(gate){gate.hidden=true;$('appShell').classList.remove('app-locked');}}
@@ -161,12 +163,78 @@ async function syncAllMonths(){
    for(const [k,m] of Object.entries(local.months||{})){if(!remoteKeys.has(k)){state.months[k]=normalizeMonth(m);await cloudSaveMonth(k,state.months[k]);}}
  }
  const keys=Object.keys(state.months).sort();month=state.months[local.activeMonth]?local.activeMonth:(keys[keys.length-1]||month);
- state.activeMonth=month;localStorage.setItem(STORE,JSON.stringify(state));cloudReady=true;render();setSync('Tersinkron','ok');hideAuth();
+ state.activeMonth=month;localStorage.setItem(STORE,JSON.stringify(state));cloudReady=true;lastCloudRefreshAt=Date.now();render();setSync('Tersinkron','ok');hideAuth();await connectRealtime();
 }
 function persist(){
+ // Local-first UI: update the screen immediately without a page reload.
  current();state.activeMonth=month;localStorage.setItem(STORE,JSON.stringify(state));render();
+ monthMutationVersion.set(month,(monthMutationVersion.get(month)||0)+1);
  if(supabaseClient&&cloudReady){const k=month,m=clone(current());saveQueue=saveQueue.then(()=>cloudSaveMonth(k,m)).then(()=>setSync('Tersinkron','ok')).catch(e=>{console.error('Cloud save failed',e);setSync('Gagal sinkron','error');});setSync('Menyimpan…','busy');}
 }
+
+async function refreshCloudData({silent=false}={}){
+ if(cloudRefreshInFlight)return;
+ if(!supabaseClient||!cloudReady){render();localStorage.setItem(STORE,JSON.stringify(state));if(!silent)setSync('Data lokal diperbarui','ok');return;}
+ cloudRefreshInFlight=true;
+ const button=$('refreshBtn'),icon=$('refreshIcon');
+ if(button){button.disabled=true;button.setAttribute('aria-busy','true');}
+ if(icon)icon.classList.add('is-refreshing');
+ if(!silent)setSync('Memuat data…','busy');
+ try{
+  // Wait for local edits to finish uploading before pulling the cloud snapshot.
+  await saveQueue;
+  const versionSnapshot=new Map(monthMutationVersion);
+  const {data:authData,error:authError}=await supabaseClient.auth.getUser();
+  if(authError)throw authError;
+  const user=authData?.user;if(!user)throw new Error('Sesi akun tidak ditemukan. Silakan login kembali.');
+  const {data:rows,error}=await supabaseClient.from('monthly_budgets').select('month_key,status,data,submitted_at,updated_at').eq('user_id',user.id).order('month_key');
+  if(error)throw error;
+  const remoteKeys=new Set((rows||[]).map(row=>row.month_key));
+  for(const row of rows||[]){
+   if(!row.month_key||!row.data)continue;
+   // Do not replace a month edited while this network request was in flight.
+   if((monthMutationVersion.get(row.month_key)||0)!==(versionSnapshot.get(row.month_key)||0))continue;
+   state.months[row.month_key]=normalizeMonth({...row.data,status:row.status,submitted:row.status==='submitted',submittedAt:row.submitted_at||row.data?.submittedAt});
+  }
+  // Preserve local-only months; import them rather than silently deleting user data.
+  for(const [key,localMonth] of Object.entries(state.months)){
+   if(!remoteKeys.has(key))await cloudSaveMonth(key,localMonth);
+  }
+  state.activeMonth=month;
+  localStorage.setItem(STORE,JSON.stringify(state));
+  lastCloudRefreshAt=Date.now();
+  render();setSync('Tersinkron','ok');
+ }catch(error){
+  console.error('Cloud refresh failed',error);
+  setSync('Refresh gagal','error');
+  if(!silent)alert(`Tidak dapat mengambil data terbaru dari cloud. Data lokal tetap dipertahankan.\n\n${error.message||'Periksa koneksi internet.'}`);
+ }finally{
+  cloudRefreshInFlight=false;
+  if(button){button.disabled=false;button.removeAttribute('aria-busy');}
+  if(icon)icon.classList.remove('is-refreshing');
+ }
+}
+$('refreshBtn')?.addEventListener('click',()=>refreshCloudData());
+
+function scheduleRealtimeRefresh(){
+ if(realtimeRefreshTimer)clearTimeout(realtimeRefreshTimer);
+ realtimeRefreshTimer=setTimeout(()=>refreshCloudData({silent:true}),650);
+}
+async function connectRealtime(){
+ if(!supabaseClient||!cloudReady)return;
+ try{
+  const {data,error}=await supabaseClient.auth.getUser();if(error)throw error;
+  const user=data?.user;if(!user)return;
+  if(realtimeChannel)await supabaseClient.removeChannel(realtimeChannel);
+  realtimeChannel=supabaseClient.channel('budget-in-live-'+user.id)
+   .on('postgres_changes',{event:'*',schema:'public',table:'monthly_budgets',filter:'user_id=eq.'+user.id},scheduleRealtimeRefresh)
+   .subscribe();
+ }catch(error){console.warn('Realtime subscription unavailable; manual refresh remains available.',error);}
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible'&&cloudReady&&Date.now()-lastCloudRefreshAt>45000)refreshCloudData({silent:true});
+});
+window.addEventListener('online',()=>{if(cloudReady)refreshCloudData({silent:true});});
 async function submitCurrentBudget(){
  const m=current();if(!m.budgets.length){alert('Tambahkan minimal satu pos anggaran sebelum submit.');return;}
  const total=totalBudget(m);if(total<0||m.income<0){alert('Pemasukan dan alokasi tidak boleh negatif.');return;}

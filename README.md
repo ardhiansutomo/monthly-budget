@@ -1,78 +1,49 @@
-# Budget-in V3.5 — Personal Finance Management
+# Budget-in V3.8 — Smart Refresh & iOS Experience
 
-## Highlights
-- Official B-in app icon applied to the in-app header and PWA.
-- Refined responsive UI, modal styling, status chips, sync indicator and subtle motion.
-- Email/password authentication through Supabase Auth.
-- Cloud storage in Supabase PostgreSQL (`monthly_budgets`) with Row Level Security.
-- Monthly carry-forward: when a new month is opened, the immediately previous month's budget is copied as a draft when available; paid flags and weekly reports reset, and actual balances start at zero.
-- Explicit Submit Budget action. Submitted state is stored in the cloud.
-- Editing a submitted month overwrites its current saved record, as selected by the owner.
-- Existing V3.4 localStorage data is imported on first login if the cloud account has no budgets; when cloud data exists, only missing local months are imported.
+Budget-in is an Indonesian personal-finance PWA hosted as a static site on GitHub Pages. Supabase provides email/password authentication and per-user monthly budget storage.
 
-## V3.5.1 hotfix
-- `config.js` is prefilled with the Supabase Project URL derived from the dashboard link and the publishable key supplied in the conversation. If Supabase still reports a network/DNS error, copy the Project URL directly from Project Overview and compare it character-for-character with `config.js`.
-- Authentication gate layout has been constrained to the viewport to prevent horizontal clipping on narrow mobile screens.
+## V3.8 highlights
+- Instant local UI updates after edits; ordinary changes do not reload the page.
+- Manual cloud refresh button in the top header.
+- Supabase Realtime listener for changes to the signed-in user's monthly budgets, with a debounced refresh.
+- Silent refresh when the app returns to the foreground after 45 seconds and when the network comes back online.
+- iOS safe-area support for Dynamic Island/notch and the Home Indicator.
+- Updated service worker cache and network-first strategy for the HTML/CSS/JS app shell, with offline fallback.
+- Existing account, password recovery, monthly budgets, weekly reports, history, trend chart, backup and theme features retained.
 
-## Setup Supabase
+## Files
+- `index.html` — application shell (GitHub Pages entry point)
+- `styles.css` — responsive UI and iOS safe-area styles
+- `app.js` — budget logic, local-first rendering, Supabase sync and Realtime refresh
+- `config.js` — Supabase project URL and publishable key
+- `schema.sql` — PostgreSQL table and Row Level Security policies
+- `sw.js` — PWA service worker
+- `manifest.webmanifest` — PWA metadata
+- `icon-192.png`, `icon-512.png` — official B-in icons
+- `CHANGELOG.md`, `PROJECT_CONTEXT.md`, `QC_REPORT.md` — project documentation and test record
 
-**Cloud connection is not active until you fill `config.js` with your own project URL and publishable/anon key.** The supplied package intentionally contains blank credentials; no live Supabase project or credentials were provided in this conversation.
+## Deploy to the existing GitHub repository
+1. Back up the current production data using the app's Backup & Pemulihan feature.
+2. Extract this ZIP.
+3. Upload the contents of this folder to the root of `ayyunnan/monthly-budget`, replacing the matching app files. Keep the file named exactly `index.html`.
+4. Commit with message `Budget-in V3.8 Smart Refresh & iOS UX`.
+5. Wait for GitHub Pages deployment to finish.
+6. Open the website, sign in, tap the refresh icon once, and verify the sync status becomes `Tersinkron`.
+7. On iPhone, close the installed PWA completely and reopen it. If the old shell remains, remove the old Home Screen shortcut and add the current website again after the deployment has updated.
 
-1. Create a Supabase project.
-2. Open `schema.sql` in Supabase Dashboard → SQL Editor and run the complete script.
-3. In Supabase Authentication → Providers, enable Email. Configure email confirmation according to your preference.
-4. Copy the Project URL and publishable/anon key from Project Settings → API.
-5. Edit `config.js`:
-   - `url`: your Project URL
-   - `anonKey`: your publishable/anon key
-6. Do not use the `service_role` key or database password in frontend files.
-7. Deploy all files to the root of the existing GitHub Pages repository.
-8. Open the site, create an account, and sign in.
+## Supabase setup and security
+- The frontend uses the Supabase publishable key in `config.js`. A publishable/anon key is intended for browser clients when Row Level Security is correctly enabled.
+- Never place a `service_role` key, database password, or other privileged secret in frontend code.
+- The `monthly_budgets` table must have RLS enabled and policies restricting rows to `auth.uid() = user_id`.
+- Supabase Realtime must be enabled for `public.monthly_budgets` in the project's Realtime/replication settings for push updates to work. If it is not enabled, manual refresh and foreground/online refresh remain available.
+- GitHub Pages is static hosting; the database and authentication are provided by Supabase.
 
-## Data model
-A single `monthly_budgets` row stores each user's month. The `data` JSONB field preserves the existing V3.4 month structure, including categories, payment modes, weekly reports and balances. RLS restricts every row to `auth.uid() = user_id`.
+## Refresh behaviour
+- Local changes are rendered immediately from application state and saved to localStorage.
+- Cloud writes are queued to avoid out-of-order writes from rapid edits.
+- Manual refresh waits for queued local writes, fetches cloud rows, then updates the in-memory state and local cache.
+- Local-only months are preserved and uploaded; they are not silently deleted during refresh.
+- Realtime updates are debounced to avoid repeated rendering during bursts of database events.
 
-## Draft and submit behaviour
-- New month: carry forward previous month's categories, amounts, income and weekly settings.
-- New month resets paid status, weekly usage and balances.
-- Draft changes save to the same month row.
-- Submit changes status to `submitted` and stores `submitted_at`.
-- Editing a submitted month overwrites the same row (no version history), matching the selected overwrite policy.
-- Earlier months remain separate rows and are not changed by a new month's edits.
-
-## Local development
-Serve the folder over HTTP (not `file://`) because Supabase Auth and the service worker require an HTTP(S) origin. A local static server is sufficient.
-
-## Important limitations / deployment notes
-- Supabase credentials have not been supplied in this package; cloud login will remain in setup-required state until `config.js` is filled.
-- Browser localStorage is retained as a local cache and first-login migration source. Cloud sync requires a working internet connection.
-- Supabase free-plan limits and email delivery settings depend on the project configuration.
-- Run a backup from the existing V3.4 app before replacing the production deployment.
-
-## V3.5.2 UI hotfix
-- Desktop app shell now expands across the available viewport beside the 252px sidebar.
-- Wide desktop dashboard uses a 12-column grid; tablet and mobile retain responsive layouts.
-- Material Symbols Rounded icon set used for navigation, account, backup, theme and category icons.
-- Service worker cache updated to V3.5.2.
-
-## V3.6 — Password recovery setup (required)
-In Supabase Dashboard:
-1. Open Authentication → URL Configuration.
-2. Set Site URL to `https://ayyunnan.github.io/monthly-budget/`.
-3. Add this exact Redirect URL: `https://ayyunnan.github.io/monthly-budget/?auth=reset`.
-4. In Authentication → Email Templates, ensure the Reset Password template uses the Supabase confirmation URL (`{{ .ConfirmationURL }}`) or the current default recovery link.
-5. Keep Email provider enabled.
-
-In the app, the user selects **Lupa password?**, enters their account email, opens the email link, creates and confirms a new password, and is returned to the login screen after the password is updated.
-
-Password visibility is available through the eye icon beside password fields. Passwords are never displayed unless the user explicitly toggles visibility.
-
-**Email delivery note:** Actual delivery depends on the Supabase project's SMTP/email provider configuration and spam filtering. The app only requests the recovery email; it cannot guarantee inbox delivery.
-
-## V3.7 — Trend & iOS PWA usability
-- Trend chart now shows three responsive line series: monthly allocation, recorded actual and planned free money. Hover/tap chart points for their values. Three KPIs summarize average actual, latest actual and planned free money.
-- On iPhone/iOS Home Screen, use the account-circle button in the top-right to open **Pengaturan akun**. This sheet includes theme switch, backup and logout. The direct theme button also remains in the topbar.
-- Logout uses an in-app two-step confirmation rather than `window.confirm`, improving reliability in standalone PWA mode.
-- iOS safe-area insets are applied to the topbar and bottom navigation.
-- The install hint is hidden when already running as an installed PWA.
-- Existing Supabase project URL and publishable key are preserved in `config.js`.
+## Notes
+This package is based on the user-confirmed V3.7 HOTFIX source files. The supplied `config.js` values are retained unchanged. Test the deployment with the existing Supabase account before making further schema changes.

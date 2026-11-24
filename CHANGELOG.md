@@ -16,3 +16,10 @@
 
 ## Important
 This is a candidate build. Test with a separate test user in the existing Supabase project before replacing production files.
+
+## Visual modernization pass
+- Rebuilt the visual token layer for a more consistent premium finance dashboard.
+- Refined desktop sidebar, wide-screen dashboard grid, mobile spacing, cards, forms, charts, and navigation.
+- Improved dark-mode surfaces and contrast using shared design tokens.
+- Added restrained hover, elevation, entrance, and press interactions.
+- Preserved reduced-motion accessibility support.

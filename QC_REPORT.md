@@ -24,3 +24,10 @@
 
 ## Release status
 Candidate build only. Do not replace production until acceptance tests pass.
+
+## Visual modernization checks
+- CSS parsed with tinycss2: 0 syntax errors.
+- Existing HTML structure and event IDs preserved.
+- Responsive breakpoints reviewed for desktop, tablet, and mobile.
+- Dark mode uses shared theme tokens and explicit component overrides.
+- Visual regression on real browsers/devices remains pending.

@@ -26,3 +26,10 @@
 - Back up production data before deployment.
 - Test with a separate user account in the same Supabase project first.
 - Candidate build has not yet passed live Supabase acceptance tests.
+
+## Visual system
+- V4.0 visual layer is additive CSS over the existing HTML structure.
+- Desktop uses a fixed workspace sidebar and wide dashboard grid.
+- Mobile retains compact bottom navigation and safe-area handling.
+- Light/dark themes share CSS design tokens.
+- Motion is restrained and respects `prefers-reduced-motion`.

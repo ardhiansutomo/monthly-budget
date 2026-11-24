@@ -33,3 +33,11 @@
 - Mobile retains compact bottom navigation and safe-area handling.
 - Light/dark themes share CSS design tokens.
 - Motion is restrained and respects `prefers-reduced-motion`.
+
+## Salary-cycle planning rules
+- A month represents the month in which the budget is used.
+- `Draft bulan berikutnya` copies category names, amounts, payment modes, and weekly-monitoring settings into the next calendar month.
+- The draft resets paid flags, weekly actuals, and actual balance amounts.
+- Calendar monitoring periods run Monday through Sunday; the first and last periods may be partial.
+- Weekly recommended allowance is monthly category amount divided by the number of calendar periods, rounded to whole rupiah.
+- Editing budget settings recalculates recommendations for enabled weekly categories.

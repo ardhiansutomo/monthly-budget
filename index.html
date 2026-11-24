@@ -85,7 +85,7 @@
   </section>
 
   <section class="section-block" id="budgetSection">
-    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Atur nominal, ceklis terlaksana, dan pilih Cash atau Cashless.</p></div><div class="heading-actions"><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button><button class="primary-btn submit-budget-btn" id="submitBudget">Submit anggaran</button></div></div>
+    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Atur nominal, ceklis terlaksana, dan pilih Cash atau Cashless.</p></div><div class="heading-actions"><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button><button class="small-action draft-next-btn" id="draftNextMonth" type="button">＋ Draft bulan berikutnya</button><button class="primary-btn submit-budget-btn" id="submitBudget">Submit anggaran</button></div></div>
     <div class="surface budget-surface"><div id="budgetList"></div><div class="budget-footer"><span>Total anggaran</span><b id="budgetTotal">Rp0</b></div><div class="cash-summary"><div><span>Uang tunai yang perlu disiapkan</span><b id="cashNeed">Rp0</b></div><small id="budgetState">Belum disubmit</small></div></div>
   </section>
 
@@ -95,7 +95,7 @@
   </section>
 
   <section class="section-block" id="trendSection">
-    <div class="section-heading"><div><span class="eyebrow">SEE YOUR PROGRESS</span><h2>Tren keuangan</h2><p>Pantau perubahan anggaran, realisasi, dan uang yang belum dialokasikan.</p></div><select id="trendRange" class="range-select"><option value="6">6 bulan</option><option value="12">12 bulan</option></select></div>
+    <div class="section-heading"><div><span class="eyebrow">SEE YOUR PROGRESS</span><h2>Tren keuangan</h2><p>Bandingkan alokasi, pemakaian aktual mingguan, dan dana yang belum dialokasikan.</p></div><select id="trendRange" class="range-select"><option value="6">6 bulan</option><option value="12">12 bulan</option></select></div>
     <div class="surface trend-surface">
       <div class="trend-legend"><span><i class="legend-dot navy"></i>Anggaran</span><span><i class="legend-dot green"></i>Realisasi</span><span><i class="legend-dot peach"></i>Uang bebas</span></div>
       <div id="trendChart" class="chart-area" role="img" aria-label="Grafik tren keuangan bulanan"></div>

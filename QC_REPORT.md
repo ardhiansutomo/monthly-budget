@@ -31,3 +31,10 @@ Candidate build only. Do not replace production until acceptance tests pass.
 - Responsive breakpoints reviewed for desktop, tablet, and mobile.
 - Dark mode uses shared theme tokens and explicit component overrides.
 - Visual regression on real browsers/devices remains pending.
+
+## Salary-cycle/calendar checks
+- December 2026 resolves to five periods: 1–6, 7–13, 14–20, 21–27, and 28–31 December.
+- Weekly selector and history cards now render the calculated period count rather than a fixed four weeks.
+- Draft-next-month action avoids overwriting an existing month and resets actual-use fields.
+- Dark-mode chart and surface tokens updated.
+- Browser-level UI interaction, Supabase write behavior, and multi-device acceptance tests remain pending.

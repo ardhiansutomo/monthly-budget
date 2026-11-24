@@ -902,3 +902,55 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.55}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+
+/* Salary-cycle planner and refined visual states */
+:root{--chart-budget:#304a70;--chart-actual:#258b70;--chart-free:#d88961;--chart-point-stroke:#fff}
+:root[data-theme="dark"]{
+ --bg:#080f1c;--surface:#111c2c;--surface-soft:#18263a;--field:#0b1626;
+ --line:#2b3c54;--ink:#edf4ff;--navy:#d8e6fa;--muted:#a6b5ca;
+ --nav-soft:#20334d;--green:#6bd3ae;--blue:#9abcf0;--peach:#ffb58f;
+ --shadow:0 14px 36px rgba(0,0,0,.28);--shadow-hover:0 20px 48px rgba(0,0,0,.4);
+ --chart-budget:#9db9e8;--chart-actual:#69d6b0;--chart-free:#ffb18a;--chart-point-stroke:#111c2c;
+}
+:root[data-theme="dark"] body{background:radial-gradient(ellipse at 78% -15%,#1b3452 0%,#0b1525 42%,#080f1c 78%);background-attachment:fixed}
+:root[data-theme="dark"] .topbar{background:rgba(17,28,44,.88);border-color:#2b3c54;box-shadow:0 8px 30px #0003}
+:root[data-theme="dark"] .balance-card{background:radial-gradient(circle at 86% 12%,#5a83b54d,transparent 30%),linear-gradient(130deg,#101d31,#193454 62%,#254d68);box-shadow:0 22px 55px #0006}
+:root[data-theme="dark"] .mini-card,:root[data-theme="dark"] .surface,:root[data-theme="dark"] .trend-surface,:root[data-theme="dark"] .weekly-card,:root[data-theme="dark"] .wallet-card,:root[data-theme="dark"] .auth-card{background:linear-gradient(145deg,#152338,#101b2b);border-color:#2b405b;box-shadow:0 12px 32px #0003}
+:root[data-theme="dark"] .mini-card small,:root[data-theme="dark"] .section-heading p,:root[data-theme="dark"] .budget-name small,:root[data-theme="dark"] .weekly-stats small{color:#aabbd1}
+:root[data-theme="dark"] .trend-kpi,:root[data-theme="dark"] .weekly-stats>div,:root[data-theme="dark"] .weekly-history>div{background:#1a2b42;border-color:#314761}
+:root[data-theme="dark"] .trend-kpi b,:root[data-theme="dark"] .weekly-stats b{color:#f1f6ff}
+:root[data-theme="dark"] .chart-gridline{stroke:#40536d;opacity:.65}
+:root[data-theme="dark"] .chart-axis-label,:root[data-theme="dark"] .chart-month-label{fill:#b4c4d9}
+:root[data-theme="dark"] .chart-zero-line{stroke:#7186a1}
+:root[data-theme="dark"] .bottom-nav{background:rgba(14,25,41,.96);border-color:#2b3c54}
+:root[data-theme="dark"] .bottom-nav a.active{background:#233a56;color:#e3efff}
+:root[data-theme="dark"] .small-action{background:#213650;color:#dceaff;border-color:#344d6b}
+:root[data-theme="dark"] .round-btn{background:#1a2b41;color:#e8f1ff;border-color:#344a64}
+:root[data-theme="dark"] .cash-summary{background:linear-gradient(120deg,#1a3045,#18382f);border-color:#315448}
+:root[data-theme="dark"] .weekly-calendar{background:linear-gradient(120deg,#172b42,#142a2d);border-color:#35516a}
+:root[data-theme="dark"] .calendar-chip{background:#17273b;color:#dce9fb;border-color:#354b65}
+:root[data-theme="dark"] .calendar-chip.active{background:#244c4b;border-color:#55b89a;color:#eafff7}
+:root[data-theme="dark"] .modal-card,:root[data-theme="dark"] .account-dialog{background:#111d2e;color:#edf4ff;border-color:#354860}
+:root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea{color-scheme:dark}
+.weekly-calendar{display:flex;flex-direction:column;gap:12px;padding:16px 18px;margin-bottom:14px;background:linear-gradient(120deg,#edf3fb,#eef8f4);border:1px solid var(--line);border-radius:17px}
+.weekly-calendar>div:first-child{display:flex;flex-direction:column;gap:3px}
+.weekly-calendar b{font-size:12px;color:var(--ink)}
+.weekly-calendar small{font-size:10px;color:var(--muted)}
+.calendar-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px}
+.calendar-chip{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;transition:transform .2s,border-color .2s,background .2s}
+.calendar-chip b{font-size:12px}.calendar-chip small{font-size:10px}
+.calendar-chip.active{background:#e1eee9;border-color:#7cb9a3;color:#1d644f}
+.calendar-chip:hover{transform:translateY(-2px)}
+.draft-next-btn{white-space:nowrap}
+.trend-surface{overflow:hidden}
+.trend-legend{display:flex;flex-wrap:wrap;gap:16px;padding:4px 2px 8px}
+.trend-kpi{min-width:0}
+.chart-area{min-width:0}
+.trend-svg{width:100%;height:100%;display:block}
+@media(max-width:650px){
+ .heading-actions{display:flex;flex-wrap:wrap;gap:7px}
+ .draft-next-btn,.submit-budget-btn{font-size:10px;padding:9px 11px}
+ .calendar-chips{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .weekly-calendar{padding:13px}
+}

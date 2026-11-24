@@ -1,10 +1,28 @@
+# Budget-in V4.0 — Project Context
 
+## Baseline
+- Source baseline: user-confirmed V3.8 repository.
+- Hosting: GitHub Pages.
+- Backend: existing Supabase project and `monthly_budgets` table.
+- Frontend: HTML, CSS, Vanilla JavaScript, PWA.
 
-## V3.8 — Smart Refresh & iOS Experience
-- Active baseline is V3.8, built directly on the user-confirmed V3.7 HOTFIX files.
-- Local edits render immediately; no browser reload is used for ordinary budget changes.
-- Manual refresh fetches all authenticated user's monthly rows from Supabase, updates local state, and preserves local-only months by importing them.
-- Supabase Realtime watches changes to the authenticated user's monthly_budgets rows and schedules a debounced refresh.
-- Returning to the app after 45 seconds and regaining network connectivity trigger a silent refresh attempt.
-- iOS topbar reserves env(safe-area-inset-top); bottom navigation reserves env(safe-area-inset-bottom).
-- Service worker cache key: budget-in-v3.8-cache.
+## Locked business rules
+1. Monthly paid checkbox means funds have been disbursed/paid, not actual spending.
+2. Actual spending is the sum of recorded weekly expenses only.
+3. Weekly monitoring remains selective and can be toggled per budget category.
+4. Disabling weekly monitoring must not erase historical weekly records.
+5. Disbursement and actual spending must never be added together.
+
+## V4.0 implementation
+- `paidActual(m)` represents disbursed funds.
+- `actual(m)` represents weekly recorded spending only.
+- Restore validates the backup structure, downloads a pre-restore snapshot, and uploads every restored month sequentially when cloud sync is active. Cloud-only rows are not deleted automatically to avoid destructive data loss.
+- New month keys validate the month range 01–12.
+- Motion layer respects `prefers-reduced-motion`.
+
+## Deployment safety
+- Do not execute `schema.sql` as part of routine deployment.
+- Do not replace Supabase project URL or publishable key.
+- Back up production data before deployment.
+- Test with a separate user account in the same Supabase project first.
+- Candidate build has not yet passed live Supabase acceptance tests.

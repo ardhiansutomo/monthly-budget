@@ -1,11 +1,18 @@
+# Budget-in V4.0 — Financial Engine & Experience Modernization
 
+## Added
+- Separated monthly disbursement status from actual weekly spending.
+- Actual spending now comes from recorded weekly entries only.
+- Weekly history remains included in actuals when monitoring is later disabled.
+- Added stricter month-key validation for new month creation.
+- Added safer restore validation, pre-restore safety download, and sequential cloud upload of restored months.
+- Added motion and interaction polish with reduced-motion support.
+- Updated service worker cache namespace to V4.0.
 
-## V3.8 — Smart Refresh & iOS Experience Upgrade
-- Added instant local re-render after edits without page reload.
-- Added manual cloud refresh control in the topbar with progress state and error feedback.
-- Added Supabase Realtime subscription for remote month changes, with debounced cloud re-fetch.
-- Added foreground/online refresh fallback to recover stale app state.
-- Updated Service Worker cache to V3.8 and network-first app-shell requests with offline fallback.
-- Improved iOS standalone safe-area spacing for Dynamic Island/notch and home indicator.
-- Refined compact iPhone header, touch targets, dashboard spacing and refresh animation.
-- Kept existing Supabase Auth, RLS, monthly data model and Budget-in visual identity.
+## Preserved
+- Existing Supabase project configuration and monthly_budgets schema.
+- Existing authentication, password recovery, Realtime, and local-first UI architecture.
+- Existing V3.8 stored month structure and legacy weekly fields.
+
+## Important
+This is a candidate build. Test with a separate test user in the existing Supabase project before replacing production files.

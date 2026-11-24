@@ -2,9 +2,9 @@ const STORE='mymoney_finance_v3', OLD='mymoney_simple_v2';
 const fmt=n=>'Rp'+Math.round(Number(n)||0).toLocaleString('id-ID');
 const clone=o=>JSON.parse(JSON.stringify(o));
 const uid=()=>('bi'+Date.now().toString(36)+Math.random().toString(36).slice(2,7));
-const DEFAULT_BUDGETS=[['Infak / Sedekah',500000],['Cicilan HP',1125000],['Umi',500000],['Mifta',200000],['Aulia',100000],['Kuota',200000],['Cartridge + Liquid',300000],['Uang pasangan',500000],['Jajan berdua',800000],['Bensin kerja',400000],['Kopi / air PT',200000],['Rumah',700000]];
+const DEFAULT_BUDGETS=[['Kebutuhan rumah tangga',0],['Transportasi',0],['Komunikasi',0],['Makan dan minum',0],['Kesehatan',0],['Pendidikan',0],['Tagihan rutin',0],['Tabungan',0]];
 function weeklyDefaults(name,amount){if(/jajan/i.test(name))return {weeklyEnabled:true,weeklyAmount:Math.round(amount/4)};if(/bensin/i.test(name))return {weeklyEnabled:true,weeklyAmount:Math.round(amount/4)};return {weeklyEnabled:false,weeklyAmount:0};}
-const freshMonth=()=>({income:7500000,budgets:DEFAULT_BUDGETS.map(([name,amount])=>({id:uid(),name,amount,paid:false,paymentMode:'cashless',...weeklyDefaults(name,amount)})),weeks:{},balances:[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}],submitted:false});
+const freshMonth=()=>({income:0,budgets:DEFAULT_BUDGETS.map(([name,amount])=>({id:uid(),name,amount,paid:false,paymentMode:'cashless',...weeklyDefaults(name,amount)})),weeks:{},balances:[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}],submitted:false});
 function normalizeMonth(m){
  m.budgets=(m.budgets||[]).map(b=>{const d=weeklyDefaults(b.name||'',+b.amount||0);return {...b,id:b.id||uid(),paid:!!b.paid,paymentMode:b.paymentMode||'cashless',weeklyEnabled:typeof b.weeklyEnabled==='boolean'?b.weeklyEnabled:d.weeklyEnabled,weeklyAmount:Number.isFinite(+b.weeklyAmount)?+b.weeklyAmount:d.weeklyAmount};});
  m.weeks=m.weeks||{};m.status=m.status||(m.submitted?'submitted':'draft');m.submitted=m.status==='submitted';
@@ -19,16 +19,39 @@ function current(){if(!state.months[month]){let prevKey=previousMonthKey(month),
 function totalBudget(m=current()){return m.budgets.reduce((a,b)=>a+(+b.amount||0),0);}
 function weeklyBudgets(m=current()){return m.budgets.filter(b=>b.weeklyEnabled&&b.weeklyAmount>0);}
 function weeklyUsed(b,rec){if(rec?.byBudget&&rec.byBudget[b.id]!=null)return +rec.byBudget[b.id]||0;if(/jajan/i.test(b.name))return +rec?.together||0;if(/bensin/i.test(b.name))return +rec?.fuel||0;return 0;}
-function weekSpent(rec,m=current()){return weeklyBudgets(m).reduce((s,b)=>s+weeklyUsed(b,rec),0);}
+function weekSpent(rec,m=current()){
+ if(!rec)return 0;
+ // Count all recorded historical entries, even when weekly monitoring is later disabled.
+ const values=rec.byBudget||{};
+ let total=Object.entries(values).reduce((sum,[id,value])=>{
+   const budget=m.budgets.find(b=>b.id===id);
+   return sum+(budget?Math.max(0,Number(value)||0):0);
+ },0);
+ // Legacy V3.x fields are only counted when no byBudget map exists.
+ if(!rec.byBudget){
+   const j=m.budgets.find(b=>/jajan/i.test(b.name)),f=m.budgets.find(b=>/bensin/i.test(b.name));
+   if(j)total+=Math.max(0,Number(rec.together)||0);
+   if(f)total+=Math.max(0,Number(rec.fuel)||0);
+   const c=m.budgets.find(b=>/kopi|air pt/i.test(b.name));
+   if(c)total+=Math.max(0,Number(rec.work)||0);
+ }
+ return total;
+}
 function dailyActual(m){return Object.values(m.weeks||{}).reduce((s,w)=>s+weekSpent(w,m),0);}
 function paidActual(m){return m.budgets.filter(b=>b.paid).reduce((a,b)=>a+(+b.amount||0),0);}
-function actual(m){return paidActual(m)+dailyActual(m);}
+function actual(m){return dailyActual(m);}
+function trackedDisbursedActual(m){
+ return m.budgets.filter(b=>b.paid&&b.weeklyEnabled).reduce((sum,b)=>sum+Object.values(m.weeks||{}).reduce((n,rec)=>n+weeklyUsed(b,rec),0),0);
+}
+function trackedRemaining(m){return trackedDisbursedActual(m)-actual(m);}
+function validMonthKey(k){return typeof k==='string'&&/^\\d{4}-(0[1-9]|1[0-2])$/.test(k);}
+
 function monthName(k){let [y,n]=k.split('-').map(Number);return new Date(y,n-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});}
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function iconFor(n){let s=n.toLowerCase();if(s.includes('infak'))return 'volunteer_activism';if(s.includes('hp')||s.includes('cicilan'))return 'smartphone';if(s.includes('umi')||s.includes('mifta')||s.includes('aulia')||s.includes('keluarga'))return 'family_restroom';if(s.includes('pasangan')||s.includes('jajan'))return 'favorite';if(s.includes('bensin'))return 'local_gas_station';if(s.includes('cartridge')||s.includes('liquid'))return 'water_drop';if(s.includes('kuota'))return 'wifi';if(s.includes('kopi')||s.includes('air'))return 'coffee';if(s.includes('rumah'))return 'home';return 'category';}
 function render(){
  const m=current(),alloc=totalBudget(m),out=actual(m);
- $('monthTitle').textContent=monthName(month);$('monthStatus').textContent=m.status==='submitted'?'✓ Anggaran tersimpan':'● Draft anggaran';$('monthStatus').className='month-status '+(m.status==='submitted'?'is-submitted':'is-draft');$('submitBudget').textContent=m.status==='submitted'?'✓ Sudah disubmit':'Submit anggaran';$('submitBudget').disabled=m.status==='submitted';$('freeMoney').textContent=fmt(m.income-alloc);$('income').textContent=fmt(m.income);$('allocated').textContent=fmt(alloc);$('paidTotal').textContent=fmt(out);$('budgetTotal').textContent=fmt(alloc);$('budgetCount').textContent=m.budgets.length+' pos';
+ $('monthTitle').textContent=monthName(month);$('monthStatus').textContent=m.status==='submitted'?'✓ Anggaran tersimpan':'● Draft anggaran';$('monthStatus').className='month-status '+(m.status==='submitted'?'is-submitted':'is-draft');$('submitBudget').textContent=m.status==='submitted'?'✓ Sudah disubmit':'Submit anggaran';$('submitBudget').disabled=m.status==='submitted';$('freeMoney').textContent=fmt(m.income-alloc);$('income').textContent=fmt(m.income);$('allocated').textContent=fmt(alloc);$('paidTotal').textContent=fmt(paidActual(m));$('budgetTotal').textContent=fmt(alloc);$('budgetCount').textContent=m.budgets.length+' pos';
  $('cashNeed').textContent=fmt(m.budgets.filter(b=>b.paymentMode==='cash'&&!b.paid).reduce((a,b)=>a+(+b.amount||0),0));$('budgetState').textContent=m.submitted?'✓ Anggaran tersimpan':'Belum disubmit';
  $('budgetList').innerHTML=m.budgets.map(b=>`<div class="budget-row"><div class="budget-name"><span class="budget-icon material-symbols-rounded">${iconFor(b.name)}</span><span><strong>${escapeHtml(b.name)}</strong><small>${b.paid?'Sudah terlaksana':'Belum terlaksana'} · ${b.paymentMode==='cash'?'Cash':'Cashless'}${b.weeklyEnabled?' · Mingguan '+fmt(b.weeklyAmount):''}</small></span></div><div class="budget-amount"><b>${fmt(b.amount)}</b><small><input class="paid-toggle" type="checkbox" aria-label="Tandai ${escapeHtml(b.name)} sudah terlaksana" ${b.paid?'checked':''} onchange="togglePaid('${b.id}',this.checked)"> ${b.paid?'Selesai':'Tandai selesai'}</small></div></div>`).join('');
  renderWeeklySections(m);
@@ -120,7 +143,42 @@ $('modalBody').addEventListener('change',e=>{if(e.target.classList.contains('edi
 $('editBalances').onclick=()=>{let m=current();showModal('Saldo aktual',`<p class="modal-help">Isi uang yang benar-benar masih tersedia. Uang yang sudah diberikan tidak lagi dihitung sebagai saldo Anda.</p>${m.balances.map((b,i)=>`<label class="modal-field">${escapeHtml(b.name)}<input class="balance-edit" data-index="${i}" type="number" value="${b.amount}"></label>`).join('')}`,()=>document.querySelectorAll('.balance-edit').forEach(x=>m.balances[+x.dataset.index].amount=+x.value||0));};
 $('backupBtn').onclick=()=>showModal('Backup & pemulihan',`<p class="modal-help">Data tersimpan di browser. Buat backup berkala. Untuk menggunakan data yang sama di beberapa perangkat, dibutuhkan sinkronisasi cloud.</p><button type="button" class="add-row" id="exportBackup">Unduh backup JSON</button><label class="modal-field">Pulihkan backup JSON<input id="importBackup" type="file" accept="application/json"></label>`,()=>{});
 $('modalBody').addEventListener('click',e=>{if(e.target.id==='exportBackup'){let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='budget-in-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}});
-$('modalBody').addEventListener('change',async e=>{if(e.target.id==='importBackup'){try{let s=JSON.parse(await e.target.files[0].text());if(!s.months)throw Error();state=s;month=state.activeMonth||Object.keys(s.months).sort().at(-1);persist();$('modal').close();}catch{alert('Backup tidak valid.');}}});
+$('modalBody').addEventListener('change',async e=>{
+ if(e.target.id!=='importBackup'||!e.target.files?.[0])return;
+ const file=e.target.files[0];
+ try{
+  if(file.size>10*1024*1024)throw new Error('Ukuran backup melebihi batas 10 MB.');
+  const candidate=JSON.parse(await file.text());
+  if(!candidate||typeof candidate!=='object'||!candidate.months||typeof candidate.months!=='object'||Array.isArray(candidate.months))throw new Error('Struktur backup tidak dikenali.');
+  const entries=Object.entries(candidate.months);
+  if(!entries.length)throw new Error('Backup tidak berisi data bulan.');
+  for(const [key,value] of entries){
+   if(!validMonthKey(key)||!value||typeof value!=='object'||!Array.isArray(value.budgets))throw new Error('Data bulan atau daftar anggaran tidak valid: '+key);
+   for(const b of value.budgets){
+    if(!b||typeof b.name!=='string'||!Number.isFinite(Number(b.amount))||Number(b.amount)<0)throw new Error('Ditemukan pos anggaran yang tidak valid pada '+key+'.');
+   }
+   normalizeMonth(value);
+  }
+  const active=candidate.activeMonth&&candidate.months[candidate.activeMonth]?candidate.activeMonth:entries.map(x=>x[0]).sort().at(-1);
+  if(!confirm('Pulihkan '+entries.length+' bulan dari backup? Data lokal saat ini akan diganti. Sebelum melanjutkan, aplikasi akan mengunduh backup kondisi sekarang.'))return;
+  // Download a safety snapshot before mutating any state.
+  const safetyBlob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const safetyUrl=URL.createObjectURL(safetyBlob),safetyLink=document.createElement('a');
+  safetyLink.href=safetyUrl;safetyLink.download='budget-in-pre-restore-'+new Date().toISOString().slice(0,10)+'.json';safetyLink.click();
+  setTimeout(()=>URL.revokeObjectURL(safetyUrl),1500);
+  const nextState={activeMonth:active,months:candidate.months};
+  for(const value of Object.values(nextState.months))normalizeMonth(value);
+  if(supabaseClient&&cloudReady){
+   setSync('Memulihkan cloud…','busy');
+   for(const [key,value] of Object.entries(nextState.months))await cloudSaveMonth(key,value);
+  }
+  state=nextState;month=active;week=1;
+  localStorage.setItem(STORE,JSON.stringify(state));
+  render();$('modal').close();
+  setSync(supabaseClient&&cloudReady?'Tersinkron':'Dipulihkan lokal',supabaseClient&&cloudReady?'ok':'');
+  alert('Pemulihan selesai. '+entries.length+' bulan telah dipulihkan'+(supabaseClient&&cloudReady?' ke cloud.': ' pada perangkat ini.'));
+ }catch(err){console.error('Backup restore failed',err);alert('Backup tidak dapat dipulihkan: '+(err.message||'File tidak valid.'));}
+});
 $('dismissHint').onclick=()=>{$('installHint').remove();localStorage.setItem('budgetin_install_dismissed','1');};if(localStorage.getItem('budgetin_install_dismissed'))$('installHint').remove();
 if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true){$('installHint')?.remove();}
 document.querySelectorAll('.bottom-nav a').forEach(a=>a.addEventListener('click',()=>{document.querySelectorAll('.bottom-nav a').forEach(x=>x.classList.remove('active'));a.classList.add('active');}));

@@ -625,3 +625,28 @@ body{min-width:0}
   .topbar{height:calc(68px + env(safe-area-inset-top,0px));min-height:calc(68px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px)}
 }
 @media(prefers-reduced-motion:reduce){.is-refreshing{animation:none}}
+
+
+/* Budget-in V4.0 — motion and interaction layer */
+:root{scroll-behavior:smooth}
+@keyframes bi-fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bi-pop{0%{opacity:0;transform:scale(.985)}100%{opacity:1;transform:scale(1)}}
+@keyframes bi-shimmer{to{background-position:-200% 0}}
+.app-shell{animation:bi-fade-up .48s cubic-bezier(.2,.75,.25,1) both}
+.section-block,.balance-card,.quick-grid,.surface,.mini-card,.wallet-card{animation:bi-fade-up .5s cubic-bezier(.2,.75,.25,1) both}
+.section-block:nth-of-type(2){animation-delay:.035s}
+.section-block:nth-of-type(3){animation-delay:.07s}
+.section-block:nth-of-type(4){animation-delay:.105s}
+.budget-row,.weekly-card,.month-row,.trend-kpi,.wallet-card{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.budget-row:hover,.weekly-card:hover,.wallet-card:hover,.mini-card:hover{transform:translateY(-2px)}
+button,.small-action,.round-btn,.primary-btn,.secondary-btn{transition:transform .18s ease,box-shadow .2s ease,background-color .2s ease,opacity .2s ease}
+button:active,.small-action:active,.round-btn:active{transform:scale(.97)}
+.primary-btn:hover{box-shadow:0 8px 20px #17274726;transform:translateY(-1px)}
+.modal-card{animation:bi-pop .2s ease both}
+.modal-card::backdrop{backdrop-filter:blur(4px)}
+.sync-status{transition:color .2s ease,background .2s ease}
+.trend-svg polyline,.trend-svg path,.trend-svg circle{transition:opacity .25s ease}
+:focus-visible{outline:3px solid #6e91c9;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}

@@ -1,4 +1,4 @@
-Budget-in V4.3
-Build: Exact User-Supplied Wallet Logo + PWA Brand Asset Refresh
-Base: V4.2 (forward-month planning, blue themes, responsive/iOS safe areas, motion)
-Release status: Candidate build; live Supabase and real-device acceptance testing required.
+Budget-in V4.4
+Build: Mobile-first app layout, next-month actual tracking, upgraded financial analytics
+Logo: Exact user-supplied image retained byte-for-byte in brand-mark-source.png
+Release status: Candidate build; browser, iOS device, and live Supabase acceptance testing required.

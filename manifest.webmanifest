@@ -1,7 +1,7 @@
 {
   "name": "Budget-in — Personal Finance",
   "short_name": "Budget-in",
-  "description": "Rencanakan anggaran bulan depan dan pantau pengeluaran dengan Budget-in.",
+  "description": "Rencanakan anggaran lebih awal, lalu pantau pemakaian mingguan pada bulan berikutnya.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

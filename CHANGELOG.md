@@ -1,21 +1,24 @@
-# Budget-in V4.3 — Exact Logo Asset Update
+# Budget-in V4.4
 
-## Logo (user-approved exact source)
-- Replaced the previous app icon assets with the wallet mark cropped directly from the exact image supplied for V4.3.
-- Preserved the original uploaded logo image unchanged as `brand-mark-source.png`.
-- Updated PWA launcher icons (192×192 and 512×512) and added 32×32 and 64×64 browser favicons.
-- Header and sign-in logo references now use the updated icon assets; Budget-in text remains alongside the mark for legibility.
-- No logo was redrawn, reinterpreted, or regenerated.
+## Added
+- Mobile-first app layout across phones, tablets, and desktop browsers. Desktop now presents a centered app-like workspace rather than a wide admin dashboard.
+- Safe-area padding retained for iPhone notch, Dynamic Island, and home indicator.
+- Weekly actual tracking now follows the linked usage month (`weeklyMonthKey`), one calendar month after the planning month for new plans.
+- November plan therefore tracks December actuals; a December plan tracks January actuals.
+- Existing legacy weekly history without a month mapping is preserved against its original month during migration.
+- Weekly allowance calculation uses the number of calendar periods in the linked usage month.
+- Trend visualization upgraded to grouped bars for budget vs weekly actual, with a utilization percentage line and plan→usage month labels.
+- Service worker cache namespace bumped to V4.4.
 
-## PWA
-- Updated the service-worker cache namespace to `budget-in-v4.3-cache`.
-- Added the original logo source and favicon assets to the precache list.
-- Updated the document title and manifest metadata for V4.3.
+## Branding
+- `brand-mark-source.png` is a byte-for-byte copy of the exact logo image supplied by the user. No redraw, recoloring, or regeneration.
+- Existing app icon crops are retained to keep the wallet mark recognizable at launcher sizes.
 
-## Preserved from V4.2
-- Blue light and dark visual systems.
-- Responsive desktop, tablet, and mobile layouts.
-- iPhone notch, Dynamic Island, and home-indicator safe-area support.
-- Reduced-motion accessibility behavior.
-- Forward-month budget planning and safe reset of actual-use fields.
-- Supabase authentication, password recovery, Realtime, and existing database schema.
+## Preserved
+- Supabase URL, publishable key, authentication, RLS schema, realtime sync, and local-first storage architecture.
+- Existing financial definitions: paid flags represent disbursement; actual spending is weekly records only.
+- Forward-month draft behavior, with the next draft tracking its own following usage month.
+
+## Validation
+- Static JavaScript/CSS/HTML/manifest checks performed.
+- Live Supabase and real iPhone/Android browser acceptance tests remain required before production deployment.

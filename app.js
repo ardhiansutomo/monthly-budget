@@ -5,18 +5,23 @@ const uid=()=>('bi'+Date.now().toString(36)+Math.random().toString(36).slice(2,7
 const DEFAULT_BUDGETS=[['Kebutuhan rumah tangga',0],['Transportasi',0],['Komunikasi',0],['Makan dan minum',0],['Kesehatan',0],['Pendidikan',0],['Tagihan rutin',0],['Tabungan',0]];
 function weeklyDefaults(name,amount){if(/jajan/i.test(name))return {weeklyEnabled:true,weeklyAmount:Math.round(amount/4)};if(/bensin/i.test(name))return {weeklyEnabled:true,weeklyAmount:Math.round(amount/4)};return {weeklyEnabled:false,weeklyAmount:0};}
 const freshMonth=()=>({income:0,budgets:DEFAULT_BUDGETS.map(([name,amount])=>({id:uid(),name,amount,paid:false,paymentMode:'cashless',...weeklyDefaults(name,amount)})),weeks:{},balances:[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}],submitted:false});
-function normalizeMonth(m){
+function normalizeMonth(m,key=month){
  m.budgets=(m.budgets||[]).map(b=>{const d=weeklyDefaults(b.name||'',+b.amount||0);return {...b,id:b.id||uid(),paid:!!b.paid,paymentMode:b.paymentMode||'cashless',weeklyEnabled:typeof b.weeklyEnabled==='boolean'?b.weeklyEnabled:d.weeklyEnabled,weeklyAmount:Number.isFinite(+b.weeklyAmount)?+b.weeklyAmount:d.weeklyAmount};});
  m.weeks=m.weeks||{};m.status=m.status||(m.submitted?'submitted':'draft');m.submitted=m.status==='submitted';
+ // Migration: retain the old calendar month for existing weekly records; new plans
+ // without weekly history track the following month's actual-use calendar.
+ if(!m.weeklyMonthKey){const hasLegacyActuals=Object.keys(m.weeks).length>0;m.weeklyMonthKey=hasLegacyActuals?key:nextMonthKey(key);}
  for(const rec of Object.values(m.weeks)){if(rec&&!rec.byBudget){rec.byBudget={};let j=m.budgets.find(b=>/jajan/i.test(b.name)),f=m.budgets.find(b=>/bensin/i.test(b.name));if(j&&rec.together!=null)rec.byBudget[j.id]=+rec.together||0;if(f&&rec.fuel!=null)rec.byBudget[f.id]=+rec.fuel||0;let c=m.budgets.find(b=>/kopi|air pt/i.test(b.name));if(c&&rec.work!=null){rec.byBudget[c.id]=+rec.work||0;if(+rec.work>0){c.weeklyEnabled=true;if(!c.weeklyAmount)c.weeklyAmount=50000;}}}}
  m.balances=m.balances||[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}];return m;
 }
+function weeklyMonthKey(m=current()){return m.weeklyMonthKey||nextMonthKey(month);}
+
 function defaultPlanningMonthKey(){const now=new Date(),d=new Date(now.getFullYear(),now.getMonth()+1,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-function loadState(){try{let s=JSON.parse(localStorage.getItem(STORE));if(s?.months){Object.values(s.months).forEach(normalizeMonth);if(!s.activeMonth||!s.months[s.activeMonth])s.activeMonth=Object.keys(s.months).sort().at(-1)||defaultPlanningMonthKey();return s;}let old=JSON.parse(localStorage.getItem(OLD));if(old?.months){let months={};for(let [k,v] of Object.entries(old.months))months[k]=normalizeMonth({income:v.income||7500000,budgets:(v.budgets||[]).map(b=>({...b,id:uid()})),weeks:v.weeks||{},balances:v.balances||[],submitted:!!v.submitted});return {activeMonth:old.activeMonth||Object.keys(months).sort().at(-1)||defaultPlanningMonthKey(),months};}}catch(e){}const firstMonth=defaultPlanningMonthKey();return {activeMonth:firstMonth,months:{[firstMonth]:freshMonth()}}}
+function loadState(){try{let s=JSON.parse(localStorage.getItem(STORE));if(s?.months){for(const [k,v] of Object.entries(s.months))normalizeMonth(v,k);if(!s.activeMonth||!s.months[s.activeMonth])s.activeMonth=Object.keys(s.months).sort().at(-1)||defaultPlanningMonthKey();return s;}let old=JSON.parse(localStorage.getItem(OLD));if(old?.months){let months={};for(let [k,v] of Object.entries(old.months))months[k]=normalizeMonth({income:v.income||7500000,budgets:(v.budgets||[]).map(b=>({...b,id:uid()})),weeks:v.weeks||{},balances:v.balances||[],submitted:!!v.submitted},k);return {activeMonth:old.activeMonth||Object.keys(months).sort().at(-1)||defaultPlanningMonthKey(),months};}}catch(e){}const firstMonth=defaultPlanningMonthKey(),fresh=freshMonth();fresh.weeklyMonthKey=nextMonthKey(firstMonth);return {activeMonth:firstMonth,months:{[firstMonth]:fresh}}}
 let state=loadState(),month=state.activeMonth||'2026-11',week=1;
 const $=id=>document.getElementById(id);
 function previousMonthKey(k){let [y,n]=k.split('-').map(Number),d=new Date(y,n-2,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-function current(){if(!state.months[month]){let prevKey=previousMonthKey(month),prev=state.months[prevKey];if(!prev){let keys=Object.keys(state.months).filter(k=>k<month).sort();prev=keys.length?state.months[keys[keys.length-1]]:null;}let next=prev?clone(prev):freshMonth();next.weeks={};next.budgets=next.budgets.map(b=>({...b,id:uid(),paid:false}));next.balances=[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}];next.submitted=false;next.status='draft';delete next.submittedAt;state.months[month]=next;}return normalizeMonth(state.months[month]);}
+function current(){if(!state.months[month]){let prevKey=previousMonthKey(month),prev=state.months[prevKey];if(!prev){let keys=Object.keys(state.months).filter(k=>k<month).sort();prev=keys.length?state.months[keys[keys.length-1]]:null;}let next=prev?clone(prev):freshMonth();next.weeks={};next.weeklyMonthKey=nextMonthKey(month);next.budgets=next.budgets.map(b=>({...b,id:uid(),paid:false}));next.balances=[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}];next.submitted=false;next.status='draft';delete next.submittedAt;state.months[month]=next;}return normalizeMonth(state.months[month],month);}
 function totalBudget(m=current()){return m.budgets.reduce((a,b)=>a+(+b.amount||0),0);}
 function weeklyBudgets(m=current()){return m.budgets.filter(b=>b.weeklyEnabled&&b.weeklyAmount>0);}
 function weeklyUsed(b,rec){if(rec?.byBudget&&rec.byBudget[b.id]!=null)return +rec.byBudget[b.id]||0;if(/jajan/i.test(b.name))return +rec?.together||0;if(/bensin/i.test(b.name))return +rec?.fuel||0;return 0;}
@@ -56,7 +61,7 @@ function monthWeekRanges(key){
 }
 function dateRangeLabel(r){const f=d=>d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});return f(r.start)+'–'+f(r.end);}
 function ensureWeeklyAllocation(m){
- const count=monthWeekRanges(month).length;
+ const count=monthWeekRanges(weeklyMonthKey(m)).length;
  m.budgets.forEach(b=>{if(b.weeklyEnabled)b.weeklyAmount=Math.round((Number(b.amount)||0)/count);});
  m.weekCount=count;return count;
 }
@@ -66,7 +71,7 @@ function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;',
 function iconFor(n){let s=n.toLowerCase();if(s.includes('infak'))return 'volunteer_activism';if(s.includes('hp')||s.includes('cicilan'))return 'smartphone';if(s.includes('umi')||s.includes('mifta')||s.includes('aulia')||s.includes('keluarga'))return 'family_restroom';if(s.includes('pasangan')||s.includes('jajan'))return 'favorite';if(s.includes('bensin'))return 'local_gas_station';if(s.includes('cartridge')||s.includes('liquid'))return 'water_drop';if(s.includes('kuota'))return 'wifi';if(s.includes('kopi')||s.includes('air'))return 'coffee';if(s.includes('rumah'))return 'home';return 'category';}
 function render(){
  const m=current(),alloc=totalBudget(m),out=actual(m);
- $('monthTitle').textContent=monthName(month);
+ $('monthTitle').textContent=monthName(month);if($('planningCycleNote'))$('planningCycleNote').textContent='Disusun '+monthName(month)+' · dipakai '+monthName(weeklyMonthKey(m));
  const targetMonthKey=nextMonthKey(month),targetExists=!!state.months[targetMonthKey];
  $('draftNextMonth').textContent=(targetExists?'↗ Buka ':'＋ Salin ke ')+monthName(targetMonthKey).replace(/\s+\d{4}$/,'');
  $('draftNextMonth').title=targetExists?'Buka anggaran '+monthName(targetMonthKey):'Salin pemasukan, semua nama pos, nominal, metode pembayaran, dan pengaturan mingguan dari '+monthName(month)+' ke '+monthName(targetMonthKey);$('monthStatus').textContent=m.status==='submitted'?'✓ Anggaran tersimpan':'● Draft anggaran';$('monthStatus').className='month-status '+(m.status==='submitted'?'is-submitted':'is-draft');$('submitBudget').textContent=m.status==='submitted'?'✓ Sudah disubmit':'Submit anggaran';$('submitBudget').disabled=m.status==='submitted';$('freeMoney').textContent=fmt(m.income-alloc);$('income').textContent=fmt(m.income);$('allocated').textContent=fmt(alloc);$('paidTotal').textContent=fmt(paidActual(m));$('budgetTotal').textContent=fmt(alloc);$('budgetCount').textContent=m.budgets.length+' pos';
@@ -77,80 +82,67 @@ function render(){
  renderHistory();renderTrend();
 }
 function renderWeeklySections(m){
- const enabled=weeklyBudgets(m),host=$('weeklySections'),ranges=monthWeekRanges(month);
+ const useMonth=weeklyMonthKey(m),enabled=weeklyBudgets(m),host=$('weeklySections'),ranges=monthWeekRanges(useMonth);
  if(week>ranges.length)week=ranges.length;
  if(!enabled.length){host.innerHTML='<div class="weekly-empty">Belum ada anggaran mingguan aktif. Buka Edit anggaran, lalu aktifkan pemantauan mingguan pada pos yang ingin dipantau.</div>';$('dailyStatus').textContent='Tidak aktif';$('dailySub').textContent='atur di anggaran';$('dailyAverage').textContent='—';return;}
- host.innerHTML=`<div class="weekly-calendar"><div><b>${monthName(month)} · ${ranges.length} periode monitoring</b><small>Senin–Minggu, termasuk minggu parsial di awal dan akhir bulan.</small></div><div class="calendar-chips">${ranges.map((r,i)=>`<button type="button" class="calendar-chip ${week===i+1?'active':''}" data-calendar-week="${i+1}"><b>W${i+1}</b><small>${dateRangeLabel(r)}</small></button>`).join('')}</div></div>`+enabled.map(b=>weeklyCard(b)).join('');
+ host.innerHTML=`<div class="weekly-calendar"><div><b>Pemakaian ${monthName(useMonth)} · ${ranges.length} periode monitoring</b><small>Anggaran ${monthName(month)} digunakan untuk mencatat aktual pada bulan ${monthName(useMonth)}.</small></div><div class="calendar-chips">${ranges.map((r,i)=>`<button type="button" class="calendar-chip ${week===i+1?'active':''}" data-calendar-week="${i+1}"><b>W${i+1}</b><small>${dateRangeLabel(r)}</small></button>`).join('')}</div></div>`+enabled.map(b=>weeklyCard(b)).join('');
  enabled.forEach(b=>{let input=$('weekly-'+b.id);if(input){input.value=weeklyUsed(b,m.weeks[week]);input.addEventListener('input',updateWeeklyCards);}});
  $('dailyStatus').textContent=enabled.length+' pos aktif';$('dailySub').textContent='laporan mingguan';
- let saved=Object.keys(m.weeks).filter(k=>+k>=1&&+k<=monthWeekRanges(month).length).length;$('dailyAverage').textContent=saved?fmt(Math.round(dailyActual(m)/saved)):'—';
+ let saved=Object.keys(m.weeks).filter(k=>+k>=1&&+k<=monthWeekRanges(useMonth).length).length;$('dailyAverage').textContent=saved?fmt(Math.round(dailyActual(m)/saved)):'—';
  updateWeeklyCards();
 }
 function weeklyCard(b){
- const rec=current().weeks[week],spent=weeklyUsed(b,rec),left=b.weeklyAmount-spent,ranges=monthWeekRanges(month);
+ const m=current(),useMonth=weeklyMonthKey(m),rec=m.weeks[week],spent=weeklyUsed(b,rec),left=b.weeklyAmount-spent,ranges=monthWeekRanges(useMonth);
  return `<article class="weekly-card"><div class="weekly-card-head"><div><span class="weekly-icon material-symbols-rounded">${iconFor(b.name)}</span><span><b>${escapeHtml(b.name)}</b><small>Jatah ${fmt(b.weeklyAmount)} / minggu</small></span></div><span class="week-picker">Minggu <select class="weekly-select" data-week-select="${b.id}">${ranges.map((r,i)=>`<option value="${i+1}" ${week===i+1?'selected':''}>W${i+1} · ${dateRangeLabel(r)}</option>`).join('')}</select></span></div><div class="weekly-stats"><div><small>Jatah</small><b>${fmt(b.weeklyAmount)}</b></div><div><small>Terpakai</small><b class="spent-value">${fmt(spent)}</b></div><div><small>${left>=0?'Sisa':'Lebih'}</small><b class="left-value">${fmt(Math.abs(left))}</b></div></div><label class="weekly-input-label">Total pemakaian minggu ini<div class="weekly-input"><span>Rp</span><input id="weekly-${b.id}" type="number" min="0" inputmode="numeric" placeholder="Masukkan total terpakai"></div></label><div class="weekly-feedback ${left<0?'over':''}">${left>=0?'Masih tersisa '+fmt(left):'Melebihi anggaran '+fmt(-left)}</div><button class="primary-btn full" data-save-week="${b.id}">✓ Simpan laporan minggu <span>→</span></button><div class="weekly-history">${ranges.map((r,i)=>{let n=i+1,x=current().weeks[n],v=weeklyUsed(b,x),d=b.weeklyAmount-v;return `<div><small>W${n} · ${dateRangeLabel(r)}</small><b class="${x?(d<0?'over-text':'good-text'):''}">${x?(d>=0?'Sisa ':'Lebih ')+fmt(Math.abs(d)):'—'}</b></div>`}).join('')}</div></article>`;
 }
 function updateWeeklyCards(){weeklyBudgets().forEach(b=>{let input=$('weekly-'+b.id);if(!input)return;let card=input.closest('.weekly-card'),spent=+input.value||0,left=b.weeklyAmount-spent;card.querySelector('.spent-value').textContent=fmt(spent);card.querySelector('.left-value').textContent=fmt(Math.abs(left));let fb=card.querySelector('.weekly-feedback');fb.textContent=left>=0?'Masih tersisa '+fmt(left):'Melebihi anggaran '+fmt(-left);fb.classList.toggle('over',left<0);});}
-function saveWeekly(id){let b=current().budgets.find(x=>x.id===id),input=$('weekly-'+id);if(!b||!input)return;let m=current();m.weeks[week]=m.weeks[week]||{byBudget:{}};m.weeks[week].byBudget=m.weeks[week].byBudget||{};m.weeks[week].byBudget[id]=+input.value||0;persist();}
+function saveWeekly(id){let m=current(),b=m.budgets.find(x=>x.id===id),input=$('weekly-'+id);if(!b||!input)return;m.weeklyMonthKey=weeklyMonthKey(m);m.weeks[week]=m.weeks[week]||{byBudget:{}};m.weeks[week].byBudget=m.weeks[week].byBudget||{};m.weeks[week].byBudget[id]=+input.value||0;persist();}
 $('weeklySections').addEventListener('change',e=>{if(e.target.matches('.weekly-select')){week=+e.target.value||1;renderWeeklySections(current());}});
 $('weeklySections').addEventListener('click',e=>{let cal=e.target.closest('[data-calendar-week]');if(cal){week=+cal.dataset.calendarWeek||1;renderWeeklySections(current());return;}let btn=e.target.closest('[data-save-week]');if(btn)saveWeekly(btn.dataset.saveWeek);});
 window.togglePaid=(id,v)=>{let b=current().budgets.find(x=>x.id===id);if(b)b.paid=v;persist();};
-function renderHistory(){let keys=Object.keys(state.months).sort().reverse();$('monthHistory').innerHTML=keys.map(k=>{let m=state.months[k];return `<div class="month-row ${k===month?'current':''}"><div><b>${monthName(k)}</b><small>Pemasukan ${fmt(m.income)} · Realisasi tercatat ${fmt(actual(m))}</small></div><div style="text-align:right"><b>${fmt(m.income-totalBudget(m))}</b><small>Belum dialokasikan</small></div><button onclick="openMonth('${k}')">${k===month?'Aktif':'Lihat'}</button></div>`}).join('');}
+function renderHistory(){let keys=Object.keys(state.months).sort().reverse();$('monthHistory').innerHTML=keys.map(k=>{let m=state.months[k];return `<div class="month-row ${k===month?'current':''}"><div><b>${monthName(k)}</b><small>Rencana ${monthName(k)} → aktual ${monthName(m.weeklyMonthKey||nextMonthKey(k))} · ${fmt(actual(m))}</small></div><div style="text-align:right"><b>${fmt(m.income-totalBudget(m))}</b><small>Belum dialokasikan</small></div><button onclick="openMonth('${k}')">${k===month?'Aktif':'Lihat'}</button></div>`}).join('');}
 window.openMonth=k=>{month=k;week=1;persist();window.scrollTo({top:0,behavior:'smooth'});};
 function renderTrend(){
  const count=+$('trendRange').value||6;
  const keys=Object.keys(state.months).sort().slice(-count);
- const vals=keys.map(k=>{const m=state.months[k];return {k,alloc:totalBudget(m),actual:actual(m),free:(+m.income||0)-totalBudget(m)};});
+ const vals=keys.map(k=>{const m=state.months[k],alloc=totalBudget(m),spent=actual(m),income=+m.income||0;return {k,useKey:m.weeklyMonthKey||nextMonthKey(k),alloc,actual:spent,free:income-alloc,util:alloc>0?spent/alloc*100:0};});
  const host=$('trendChart');
- if(!vals.length){host.innerHTML='<div class="chart-empty"><span class="material-symbols-rounded">insert_chart</span><b>Belum ada data tren</b><small>Simpan anggaran bulanan untuk mulai melihat perkembangan.</small></div>';$('trendSummary').innerHTML='';return;}
- const W=760,H=270,L=66,R=22,T=20,B=42,plotW=W-L-R,plotH=H-T-B;
- const all=vals.flatMap(v=>[v.alloc,v.actual,v.free]);
- let min=Math.min(0,...all),max=Math.max(1,...all);
- if(max===min)max=min+1;
- const pad=(max-min)*.12;min-=pad;max+=pad;
- const x=i=>L+(vals.length===1?plotW/2:i*plotW/(vals.length-1));
- const y=v=>T+(max-v)/(max-min)*plotH;
- const compact=v=>new Intl.NumberFormat('id-ID',{notation:'compact',maximumFractionDigits:1}).format(v);
- const series=[
-  {key:'alloc',name:'Anggaran',color:'var(--chart-budget)',width:3},
-  {key:'actual',name:'Realisasi',color:'var(--chart-actual)',width:3.5},
-  {key:'free',name:'Uang bebas',color:'var(--chart-free)',width:3}
- ];
- let svg=`<svg class="trend-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Grafik garis tren anggaran, realisasi, dan uang bebas selama ${vals.length} bulan"><defs><linearGradient id="actualArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--chart-actual)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--chart-actual)" stop-opacity="0"/></linearGradient></defs>`;
- for(let i=0;i<5;i++){
-  const value=min+(max-min)*i/4,yy=y(value);
-  svg+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" class="chart-gridline"/>`;
-  svg+=`<text x="${L-10}" y="${yy+4}" text-anchor="end" class="chart-axis-label">${escapeHtml(compact(value))}</text>`;
+ if(!vals.length){host.innerHTML='<div class="chart-empty"><span class="material-symbols-rounded">query_stats</span><b>Belum ada data tren</b><small>Submit anggaran dan catat aktual mingguan untuk melihat perkembangan.</small></div>';$('trendSummary').innerHTML='';return;}
+ const W=900,H=330,L=76,R=58,T=24,B=58,plotW=W-L-R,plotH=H-T-B;
+ const maxMoney=Math.max(1,...vals.flatMap(v=>[v.alloc,v.actual]));
+ const axisMax=Math.ceil(maxMoney/4/100000)*100000*4||maxMoney;
+ const yMoney=v=>T+plotH-(Math.max(0,v)/axisMax)*plotH;
+ const yPct=v=>T+plotH-(Math.min(150,Math.max(0,v))/150)*plotH;
+ const groupW=plotW/vals.length,barW=Math.min(23,Math.max(8,groupW*.22));
+ const moneyLabel=v=>new Intl.NumberFormat('id-ID',{notation:'compact',maximumFractionDigits:1}).format(v);
+ let svg=`<svg class="trend-svg trend-bars" viewBox="0 0 ${W} ${H}" role="img" aria-label="Grafik batang anggaran dan aktual mingguan dengan garis persentase pemakaian untuk ${vals.length} rencana bulanan"><defs><linearGradient id="planBar" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#4d8fe8"/><stop offset="100%" stop-color="#2464b7"/></linearGradient><linearGradient id="actualBar" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#45c5a1"/><stop offset="100%" stop-color="#168b76"/></linearGradient><linearGradient id="chartGlow" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#4d8fe8" stop-opacity=".12"/><stop offset="100%" stop-color="#4d8fe8" stop-opacity="0"/></linearGradient></defs>`;
+ for(let i=0;i<=4;i++){
+  const value=axisMax*i/4,yy=yMoney(value);
+  svg+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" class="chart-gridline"/><text x="${L-12}" y="${yy+4}" text-anchor="end" class="chart-axis-label">${escapeHtml(moneyLabel(value))}</text>`;
+  svg+=`<text x="${W-R+12}" y="${yy+4}" text-anchor="start" class="chart-axis-label">${i*37.5}%</text>`;
  }
- if(min<=0&&max>=0){svg+=`<line x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}" class="chart-zero-line"/>`;}
- const actualPoints=vals.map((v,i)=>`${x(i)},${y(v.actual)}`).join(' ');
- if(vals.length>1){
-  const area=`M ${x(0)} ${y(vals[0].actual)} `+vals.slice(1).map((v,i)=>`L ${x(i+1)} ${y(v.actual)}`).join(' ')+` L ${x(vals.length-1)} ${T+plotH} L ${x(0)} ${T+plotH} Z`;
-  svg+=`<path d="${area}" fill="url(#actualArea)"/>`;
- }
- series.forEach(s=>{
-  const points=vals.map((v,i)=>`${x(i)},${y(v[s.key])}`).join(' ');
-  if(vals.length>1)svg+=`<polyline points="${points}" fill="none" stroke="${s.color}" stroke-width="${s.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  vals.forEach((v,i)=>{
-   const cx=x(i),cy=y(v[s.key]),label=`${monthName(v.k)} — ${s.name}: ${fmt(v[s.key])}`;
-   svg+=`<circle cx="${cx}" cy="${cy}" r="5" fill="${s.color}" stroke="var(--chart-point-stroke)" stroke-width="2"><title>${escapeHtml(label)}</title></circle>`;
-  });
- });
+ const points=[];
  vals.forEach((v,i)=>{
-  const label=monthName(v.k).split(' ')[0].slice(0,3);
-  svg+=`<text x="${x(i)}" y="${H-13}" text-anchor="middle" class="chart-month-label">${escapeHtml(label)}</text>`;
+  const cx=L+groupW*(i+.5),x1=cx-barW-3,x2=cx+3;
+  const h1=Math.max(0,T+plotH-yMoney(v.alloc)),h2=Math.max(0,T+plotH-yMoney(v.actual));
+  const title=`Rencana ${monthName(v.k)} · Aktual ${monthName(v.useKey)} | Anggaran ${fmt(v.alloc)} | Aktual ${fmt(v.actual)} | Pemakaian ${v.util.toFixed(1)}%`;
+  svg+=`<rect x="${x1}" y="${yMoney(v.alloc)}" width="${barW}" height="${h1}" rx="7" fill="url(#planBar)" opacity=".95"><title>${escapeHtml(title)}</title></rect>`;
+  svg+=`<rect x="${x2}" y="${yMoney(v.actual)}" width="${barW}" height="${h2}" rx="7" fill="url(#actualBar)" opacity=".98"><title>${escapeHtml(title)}</title></rect>`;
+  const py=yPct(v.util);points.push(`${cx},${py}`);
+  const labelPlan=monthName(v.k).split(' ')[0].slice(0,3),labelUse=monthName(v.useKey).split(' ')[0].slice(0,3);
+  svg+=`<text x="${cx}" y="${H-28}" text-anchor="middle" class="chart-month-label">${escapeHtml(labelPlan)}→${escapeHtml(labelUse)}</text>`;
  });
- svg+='</svg>';
- host.innerHTML=svg;
- const avg=vals.reduce((a,v)=>a+v.actual,0)/vals.length,last=vals[vals.length-1];
+ if(vals.length>1)svg+=`<polyline points="${points.join(' ')}" fill="none" stroke="#e59a58" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`;
+ vals.forEach((v,i)=>{const cx=L+groupW*(i+.5),py=yPct(v.util);svg+=`<circle cx="${cx}" cy="${py}" r="5.5" fill="#e59a58" stroke="var(--surface)" stroke-width="3"><title>${escapeHtml('Pemakaian '+monthName(v.k)+' untuk '+monthName(v.useKey)+': '+v.util.toFixed(1)+'%')}</title></circle>`;});
+ svg+='</svg>';host.innerHTML=svg;
+ const totalAlloc=vals.reduce((s,v)=>s+v.alloc,0),totalActual=vals.reduce((s,v)=>s+v.actual,0),avgUtil=totalAlloc?totalActual/totalAlloc*100:0,last=vals[vals.length-1];
  const delta=vals.length>1?last.actual-vals[vals.length-2].actual:null;
- const deltaText=delta===null?'Butuh data bulan lain':`${delta>0?'+':delta<0?'−':''}${fmt(Math.abs(delta))} dari bulan sebelumnya`;
+ const deltaText=delta===null?'Butuh data rencana lain':`${delta>0?'+':delta<0?'−':''}${fmt(Math.abs(delta))} dibanding aktual periode sebelumnya`;
  $('trendSummary').innerHTML=`
-  <div class="trend-kpi"><small>Rata-rata realisasi</small><b>${fmt(avg)}</b><em>Selama ${vals.length} bulan</em></div>
-  <div class="trend-kpi"><small>Realisasi bulan terakhir</small><b>${fmt(last.actual)}</b><em>${escapeHtml(deltaText)}</em></div>
-  <div class="trend-kpi"><small>Uang bebas terencana</small><b>${fmt(last.free)}</b><em>${last.free<0?'Alokasi melebihi pemasukan':'Sisa setelah alokasi'}</em></div>`;
+  <div class="trend-kpi"><small>Total anggaran</small><b>${fmt(totalAlloc)}</b><em>Akumulasi ${vals.length} rencana</em></div>
+  <div class="trend-kpi"><small>Total aktual mingguan</small><b>${fmt(totalActual)}</b><em>${escapeHtml(deltaText)}</em></div>
+  <div class="trend-kpi"><small>Rasio pemakaian</small><b>${avgUtil.toFixed(1)}%</b><em>Aktual dibanding anggaran</em></div>`;
 }
-
 $('trendRange').onchange=renderTrend;
 $('prevMonth').onclick=()=>shiftMonth(-1);$('nextMonth').onclick=()=>shiftMonth(1);
 function shiftMonth(n){let [y,m]=month.split('-').map(Number),d=new Date(y,m-1+n,1);month=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;week=1;persist();}
@@ -167,20 +159,20 @@ function createNextMonthDraft(){
  // payment modes and monitoring preferences) into the following use-month.
  const copied=clone(source);
  copied.budgets=copied.budgets.map(b=>({...b,id:uid(),paid:false}));
- copied.weeks={};
+ copied.weeks={};copied.weeklyMonthKey=nextMonthKey(targetKey);
  copied.balances=(source.balances||[]).map(b=>({...b,amount:0}));
  copied.submitted=false;copied.status='draft';copied.budgetPeriod=targetKey;copied.copiedFromMonth=sourceKey;
  delete copied.submittedAt;
- const count=monthWeekRanges(targetKey).length;
+ const count=monthWeekRanges(copied.weeklyMonthKey).length;
  copied.budgets.forEach(b=>{if(b.weeklyEnabled)b.weeklyAmount=Math.round((Number(b.amount)||0)/count);});
  copied.weekCount=count;
  state.months[targetKey]=copied;month=targetKey;week=1;persist();
  alert('Anggaran '+monthName(targetKey)+' berhasil disiapkan dari '+monthName(sourceKey)+'. Seluruh pemasukan dan nominal pos disalin. Metode pembayaran serta pengaturan monitoring mingguan dipertahankan. Checklist, catatan pengeluaran mingguan, dan saldo aktual direset.');
 }
-$('newMonth').onclick=()=>{let v=prompt('Bulan baru (format YYYY-MM), contoh 2026-12');if(!v||!/^\d{4}-\d{2}$/.test(v))return;if(state.months[v]){alert('Bulan sudah ada. Buka melalui Riwayat.');return;}let prev=clone(current());prev.weeks={};prev.budgets.forEach(b=>{b.id=uid();b.paid=false;});prev.submitted=false;prev.status='draft';delete prev.submittedAt;prev.balances=[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}];state.months[v]=prev;month=v;week=1;persist();};
+$('newMonth').onclick=()=>{let v=prompt('Bulan baru (format YYYY-MM), contoh 2026-12');if(!v||!/^\d{4}-\d{2}$/.test(v))return;if(state.months[v]){alert('Bulan sudah ada. Buka melalui Riwayat.');return;}let prev=clone(current());prev.weeks={};prev.weeklyMonthKey=nextMonthKey(v);prev.budgets.forEach(b=>{b.id=uid();b.paid=false;});prev.submitted=false;prev.status='draft';delete prev.submittedAt;prev.balances=[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}];state.months[v]=prev;month=v;week=1;persist();};
 $('draftNextMonth')?.addEventListener('click',createNextMonthDraft);
 function showModal(title,body,saveFn){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modalSave').textContent=title.startsWith('Edit anggaran')?'✓ Simpan & submit anggaran':'✓ Simpan perubahan';$('modal').showModal();$('modalSave').onclick=e=>{e.preventDefault();saveFn();$('modal').close();persist();};}
-$('editBudget').onclick=()=>{let m=current();showModal('Edit anggaran '+monthName(month),`<label class="modal-field">Pemasukan bulan ini (Rp)<input id="editIncome" type="number" value="${m.income}"></label><p class="modal-help">Ubah nama, nominal, metode Cash/Cashless, dan status pos. Aktifkan pemantauan mingguan pada pos yang ingin memiliki laporan mingguan terpisah. Anggaran bulan lain tidak berubah.</p><div id="editRows">${m.budgets.map(b=>budgetEditRow(b)).join('')}</div><button type="button" class="add-row" id="addBudgetRow">＋ Tambah pos anggaran</button>`,()=>{m.income=+$('editIncome').value||0;m.budgets=[...document.querySelectorAll('.edit-row')].map(row=>({id:row.dataset.id||uid(),name:row.querySelector('.edit-name').value.trim(),amount:+row.querySelector('.edit-amount').value||0,paid:row.querySelector('.edit-paid').checked,paymentMode:row.querySelector('.edit-mode:checked').value,weeklyEnabled:row.querySelector('.edit-weekly').checked,weeklyAmount:+row.querySelector('.edit-weekly-amount').value||0})).filter(b=>b.name);m.submitted=m.status==='submitted';if(m.submitted)m.submittedAt=m.submittedAt||new Date().toISOString();ensureWeeklyAllocation(m);});$('addBudgetRow').onclick=()=> $('editRows').insertAdjacentHTML('beforeend',budgetEditRow({id:uid(),name:'Pos baru',amount:0,paid:false,paymentMode:'cashless',weeklyEnabled:false,weeklyAmount:0}));};
+$('editBudget').onclick=()=>{let m=current();showModal('Edit anggaran '+monthName(month),`<label class="modal-field">Pemasukan untuk rencana ${monthName(month)} (Rp)<input id="editIncome" type="number" value="${m.income}"></label><p class="modal-help">Rencana ${monthName(month)} akan dipakai pada ${monthName(weeklyMonthKey(m))}. Ubah nama, nominal, metode Cash/Cashless, dan aktifkan monitoring untuk pos yang ingin dicatat per minggu.</p><div id="editRows">${m.budgets.map(b=>budgetEditRow(b)).join('')}</div><button type="button" class="add-row" id="addBudgetRow">＋ Tambah pos anggaran</button>`,()=>{m.income=+$('editIncome').value||0;m.budgets=[...document.querySelectorAll('.edit-row')].map(row=>({id:row.dataset.id||uid(),name:row.querySelector('.edit-name').value.trim(),amount:+row.querySelector('.edit-amount').value||0,paid:row.querySelector('.edit-paid').checked,paymentMode:row.querySelector('.edit-mode:checked').value,weeklyEnabled:row.querySelector('.edit-weekly').checked,weeklyAmount:+row.querySelector('.edit-weekly-amount').value||0})).filter(b=>b.name);m.submitted=m.status==='submitted';if(m.submitted)m.submittedAt=m.submittedAt||new Date().toISOString();ensureWeeklyAllocation(m);});$('addBudgetRow').onclick=()=> $('editRows').insertAdjacentHTML('beforeend',budgetEditRow({id:uid(),name:'Pos baru',amount:0,paid:false,paymentMode:'cashless',weeklyEnabled:false,weeklyAmount:0}));};
 function budgetEditRow(b){return `<div class="edit-row" data-id="${b.id}"><input class="edit-name" aria-label="Nama pos" value="${escapeHtml(b.name)}"><input class="edit-amount" aria-label="Nominal pos" type="number" value="${b.amount}"><div class="payment-choice"><label><input class="edit-mode" type="radio" name="mode-${b.id}" value="cash" ${b.paymentMode==='cash'?'checked':''}><span>☑ Cash</span></label><label><input class="edit-mode" type="radio" name="mode-${b.id}" value="cashless" ${b.paymentMode!=='cash'?'checked':''}><span>☑ Cashless</span></label></div><button type="button" aria-label="Hapus pos" onclick="this.closest('.edit-row').remove()">×</button><label class="modal-help" style="grid-column:1/-1"><input class="edit-paid" type="checkbox" ${b.paid?'checked':''}> Sudah terlaksana / dibayarkan</label><div class="weekly-config"><label><input class="edit-weekly" type="checkbox" ${b.weeklyEnabled?'checked':''}> Pantau sebagai anggaran mingguan</label><input class="edit-weekly-amount" type="number" aria-label="Jatah per minggu" placeholder="Jatah per minggu" value="${b.weeklyAmount||''}" ${b.weeklyEnabled?'':'disabled'}></div></div>`;}
 $('modalBody').addEventListener('change',e=>{if(e.target.classList.contains('edit-weekly')){let row=e.target.closest('.edit-row'),amt=row.querySelector('.edit-weekly-amount');amt.disabled=!e.target.checked;if(e.target.checked&&!amt.value)amt.value=Math.round((+row.querySelector('.edit-amount').value||0)/4);}});
 $('editBalances').onclick=()=>{let m=current();showModal('Saldo aktual',`<p class="modal-help">Isi uang yang benar-benar masih tersedia. Uang yang sudah diberikan tidak lagi dihitung sebagai saldo Anda.</p>${m.balances.map((b,i)=>`<label class="modal-field">${escapeHtml(b.name)}<input class="balance-edit" data-index="${i}" type="number" value="${b.amount}"></label>`).join('')}`,()=>document.querySelectorAll('.balance-edit').forEach(x=>m.balances[+x.dataset.index].amount=+x.value||0));};
@@ -200,7 +192,7 @@ $('modalBody').addEventListener('change',async e=>{
    for(const b of value.budgets){
     if(!b||typeof b.name!=='string'||!Number.isFinite(Number(b.amount))||Number(b.amount)<0)throw new Error('Ditemukan pos anggaran yang tidak valid pada '+key+'.');
    }
-   normalizeMonth(value);
+   normalizeMonth(value,key);
   }
   const active=candidate.activeMonth&&candidate.months[candidate.activeMonth]?candidate.activeMonth:entries.map(x=>x[0]).sort().at(-1);
   if(!confirm('Pulihkan '+entries.length+' bulan dari backup? Data lokal saat ini akan diganti. Sebelum melanjutkan, aplikasi akan mengunduh backup kondisi sekarang.'))return;
@@ -210,7 +202,7 @@ $('modalBody').addEventListener('change',async e=>{
   safetyLink.href=safetyUrl;safetyLink.download='budget-in-pre-restore-'+new Date().toISOString().slice(0,10)+'.json';safetyLink.click();
   setTimeout(()=>URL.revokeObjectURL(safetyUrl),1500);
   const nextState={activeMonth:active,months:candidate.months};
-  for(const value of Object.values(nextState.months))normalizeMonth(value);
+  for(const [key,value] of Object.entries(nextState.months))normalizeMonth(value,key);
   if(supabaseClient&&cloudReady){
    setSync('Memulihkan cloud…','busy');
    for(const [key,value] of Object.entries(nextState.months))await cloudSaveMonth(key,value);
@@ -260,8 +252,8 @@ async function syncAllMonths(){
    for(const [k,m] of Object.entries(local.months||{})){m.status=m.status||(m.submitted?'submitted':'draft');await cloudSaveMonth(k,m);}
  }else{
    // Cloud is canonical; import only local months that do not yet exist remotely.
-   for(const r of rows||[]){state.months[r.month_key]=normalizeMonth({...r.data,status:r.status,submitted:r.status==='submitted',submittedAt:r.submitted_at||r.data?.submittedAt});}
-   for(const [k,m] of Object.entries(local.months||{})){if(!remoteKeys.has(k)){state.months[k]=normalizeMonth(m);await cloudSaveMonth(k,state.months[k]);}}
+   for(const r of rows||[]){state.months[r.month_key]=normalizeMonth({...r.data,status:r.status,submitted:r.status==='submitted',submittedAt:r.submitted_at||r.data?.submittedAt},r.month_key);}
+   for(const [k,m] of Object.entries(local.months||{})){if(!remoteKeys.has(k)){state.months[k]=normalizeMonth(m,k);await cloudSaveMonth(k,state.months[k]);}}
  }
  const keys=Object.keys(state.months).sort();month=state.months[local.activeMonth]?local.activeMonth:(keys[keys.length-1]||month);
  state.activeMonth=month;localStorage.setItem(STORE,JSON.stringify(state));cloudReady=true;lastCloudRefreshAt=Date.now();render();setSync('Tersinkron','ok');hideAuth();await connectRealtime();
@@ -295,7 +287,7 @@ async function refreshCloudData({silent=false}={}){
    if(!row.month_key||!row.data)continue;
    // Do not replace a month edited while this network request was in flight.
    if((monthMutationVersion.get(row.month_key)||0)!==(versionSnapshot.get(row.month_key)||0))continue;
-   state.months[row.month_key]=normalizeMonth({...row.data,status:row.status,submitted:row.status==='submitted',submittedAt:row.submitted_at||row.data?.submittedAt});
+   state.months[row.month_key]=normalizeMonth({...row.data,status:row.status,submitted:row.status==='submitted',submittedAt:row.submitted_at||row.data?.submittedAt},row.month_key);
   }
   // Preserve local-only months; import them rather than silently deleting user data.
   for(const [key,localMonth] of Object.entries(state.months)){
@@ -339,7 +331,7 @@ window.addEventListener('online',()=>{if(cloudReady)refreshCloudData({silent:tru
 async function submitCurrentBudget(){
  const m=current();if(!m.budgets.length){alert('Tambahkan minimal satu pos anggaran sebelum submit.');return;}
  const total=totalBudget(m),periodCount=ensureWeeklyAllocation(m);if(total<0||m.income<0){alert('Pemasukan dan alokasi tidak boleh negatif.');return;}
- const ok=confirm(`Submit anggaran ${monthName(month)}?\nPeriode monitoring: ${periodCount} minggu\n\nPemasukan: ${fmt(m.income)}\nTotal alokasi: ${fmt(total)}\nSisa belum dialokasikan: ${fmt(m.income-total)}\n\nAnggaran akan disimpan ke database. Revisi berikutnya akan menimpa versi aktif bulan ini.`);
+ const ok=confirm(`Submit rencana anggaran ${monthName(month)} untuk pemakaian ${monthName(weeklyMonthKey(m))}?\nPeriode monitoring: ${periodCount} minggu\n\nPemasukan: ${fmt(m.income)}\nTotal alokasi: ${fmt(total)}\nSisa belum dialokasikan: ${fmt(m.income-total)}\n\nAnggaran akan disimpan ke database. Revisi berikutnya akan menimpa versi aktif bulan ini.`);
  if(!ok)return;
  m.status='submitted';m.submitted=true;m.submittedAt=new Date().toISOString();m.budgetPeriod=month;m.weekCount=periodCount;
  persist();

@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
-<title>Budget-in V4.3 — Personal Finance</title>
+<title>Budget-in V4.4 — Personal Finance</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -66,7 +66,7 @@
 </header>
 <main class="main">
   <section class="welcome-row">
-    <div><div class="eyebrow">PERSONAL FINANCE SPACE</div><h1 id="monthTitle">November 2026</h1><div id="monthStatus" class="month-status">Draft</div></div>
+    <div><div class="eyebrow">PERSONAL FINANCE SPACE</div><h1 id="monthTitle">November 2026</h1><div id="monthStatus" class="month-status">Draft</div><small id="planningCycleNote" class="planning-cycle-note">Disusun bulan ini · dipakai bulan berikutnya</small></div>
     <div class="month-arrows"><button id="prevMonth" aria-label="Bulan sebelumnya">‹</button><button id="nextMonth" aria-label="Bulan berikutnya">›</button></div>
   </section>
 
@@ -94,17 +94,17 @@
   </section>
 
   <section class="section-block" id="dailySection">
-    <div class="section-heading"><div><span class="eyebrow">WEEKLY CHECK-IN</span><h2>Anggaran mingguan</h2><p>Section hanya muncul untuk pos yang diaktifkan di pengaturan anggaran.</p></div></div>
+    <div class="section-heading"><div><span class="eyebrow">WEEKLY CHECK-IN</span><h2>Anggaran mingguan</h2><p>Anggaran bulan ini menjadi acuan; catatan aktual mengikuti kalender bulan pemakaian berikutnya.</p></div></div>
     <div id="weeklySections" class="weekly-sections"></div>
   </section>
 
   <section class="section-block" id="trendSection">
-    <div class="section-heading"><div><span class="eyebrow">SEE YOUR PROGRESS</span><h2>Tren keuangan</h2><p>Bandingkan alokasi, pemakaian aktual mingguan, dan dana yang belum dialokasikan.</p></div><select id="trendRange" class="range-select"><option value="6">6 bulan</option><option value="12">12 bulan</option></select></div>
+    <div class="section-heading"><div><span class="eyebrow">SEE YOUR PROGRESS</span><h2>Tren keuangan</h2><p>Bandingkan rencana bulanan dengan aktual pada bulan pemakaian berikutnya.</p></div><select id="trendRange" class="range-select"><option value="6">6 bulan</option><option value="12">12 bulan</option></select></div>
     <div class="surface trend-surface">
-      <div class="trend-legend"><span><i class="legend-dot navy"></i>Anggaran</span><span><i class="legend-dot green"></i>Realisasi</span><span><i class="legend-dot peach"></i>Uang bebas</span></div>
+      <div class="trend-legend"><span><i class="legend-dot navy"></i>Anggaran</span><span><i class="legend-dot green"></i>Aktual mingguan</span><span><i class="legend-dot peach"></i>Rasio pemakaian</span></div>
       <div id="trendChart" class="chart-area" role="img" aria-label="Grafik tren keuangan bulanan"></div>
       <div id="trendSummary" class="trend-summary"></div>
-      <p class="chart-note">Grafik menggunakan data yang sudah tersimpan pada setiap bulan. Realisasi merupakan angka tercatat dari checklist pembayaran dan laporan mingguan; data yang belum lengkap dapat membuat perbandingan bersifat sementara.</p>
+      <p class="chart-note">Setiap pasangan label menunjukkan bulan rencana → bulan pemakaian. Aktual dihitung dari laporan mingguan; rasio pemakaian membandingkan aktual dengan total anggaran.</p>
     </div>
   </section>
 

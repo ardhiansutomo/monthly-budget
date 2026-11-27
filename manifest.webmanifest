@@ -1,12 +1,12 @@
 {
-  "name": "Budget-in Personal Finance",
+  "name": "Budget-in — Personal Finance",
   "short_name": "Budget-in",
-  "description": "Personal Finance Management",
+  "description": "Rencanakan anggaran bulanan dan pantau pengeluaran dengan Budget-in.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f6f8fc",
-  "theme_color": "#172747",
+  "background_color": "#f3f6fb",
+  "theme_color": "#0b1e3b",
   "icons": [
     {
       "src": "icon-192.png",

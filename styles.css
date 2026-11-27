@@ -954,3 +954,10 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.55}
  .calendar-chips{grid-template-columns:repeat(2,minmax(0,1fr))}
  .weekly-calendar{padding:13px}
 }
+
+/* Budget-in V4.1 — blue brand accent */
+:root{--blue:#3b82f6;--chart-budget:#315b91}
+:root[data-theme="dark"]{--blue:#8dbbff;--chart-budget:#9db9e8}
+.draft-next-btn{background:#eaf2ff!important;color:#174b91!important;border:1px solid #d5e5ff!important}
+:root[data-theme="dark"] .draft-next-btn{background:#1b3556!important;color:#cfe2ff!important;border-color:#31527a!important}
+.brand b{color:var(--ink)}

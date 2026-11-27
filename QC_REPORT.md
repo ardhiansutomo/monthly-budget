@@ -38,3 +38,11 @@ Candidate build only. Do not replace production until acceptance tests pass.
 - Draft-next-month action avoids overwriting an existing month and resets actual-use fields.
 - Dark-mode chart and surface tokens updated.
 - Browser-level UI interaction, Supabase write behavior, and multi-device acceptance tests remain pending.
+
+
+## V4.1 checks
+- Blue app icon generated from the user-approved Budget-in B monogram and resized to 192px and 512px.
+- PWA manifest and service-worker cache namespace updated.
+- New-install default planning month is computed dynamically as the next calendar month; saved active months are preserved.
+- Next-month draft copies income and all budget setup fields, resets actual-use fields, and refuses to overwrite an existing destination.
+- JavaScript syntax and package contents require final automated checks before deployment. Live Supabase acceptance testing remains required.

@@ -11,7 +11,8 @@ function normalizeMonth(m){
  for(const rec of Object.values(m.weeks)){if(rec&&!rec.byBudget){rec.byBudget={};let j=m.budgets.find(b=>/jajan/i.test(b.name)),f=m.budgets.find(b=>/bensin/i.test(b.name));if(j&&rec.together!=null)rec.byBudget[j.id]=+rec.together||0;if(f&&rec.fuel!=null)rec.byBudget[f.id]=+rec.fuel||0;let c=m.budgets.find(b=>/kopi|air pt/i.test(b.name));if(c&&rec.work!=null){rec.byBudget[c.id]=+rec.work||0;if(+rec.work>0){c.weeklyEnabled=true;if(!c.weeklyAmount)c.weeklyAmount=50000;}}}}
  m.balances=m.balances||[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}];return m;
 }
-function loadState(){try{let s=JSON.parse(localStorage.getItem(STORE));if(s?.months){Object.values(s.months).forEach(normalizeMonth);return s;}let old=JSON.parse(localStorage.getItem(OLD));if(old?.months){let months={};for(let [k,v] of Object.entries(old.months))months[k]=normalizeMonth({income:v.income||7500000,budgets:(v.budgets||[]).map(b=>({...b,id:uid()})),weeks:v.weeks||{},balances:v.balances||[],submitted:!!v.submitted});return {activeMonth:old.activeMonth||'2026-11',months};}}catch(e){}return {activeMonth:'2026-11',months:{'2026-11':freshMonth()}}}
+function defaultPlanningMonthKey(){const now=new Date(),d=new Date(now.getFullYear(),now.getMonth()+1,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+function loadState(){try{let s=JSON.parse(localStorage.getItem(STORE));if(s?.months){Object.values(s.months).forEach(normalizeMonth);if(!s.activeMonth||!s.months[s.activeMonth])s.activeMonth=Object.keys(s.months).sort().at(-1)||defaultPlanningMonthKey();return s;}let old=JSON.parse(localStorage.getItem(OLD));if(old?.months){let months={};for(let [k,v] of Object.entries(old.months))months[k]=normalizeMonth({income:v.income||7500000,budgets:(v.budgets||[]).map(b=>({...b,id:uid()})),weeks:v.weeks||{},balances:v.balances||[],submitted:!!v.submitted});return {activeMonth:old.activeMonth||Object.keys(months).sort().at(-1)||defaultPlanningMonthKey(),months};}}catch(e){}const firstMonth=defaultPlanningMonthKey();return {activeMonth:firstMonth,months:{[firstMonth]:freshMonth()}}}
 let state=loadState(),month=state.activeMonth||'2026-11',week=1;
 const $=id=>document.getElementById(id);
 function previousMonthKey(k){let [y,n]=k.split('-').map(Number),d=new Date(y,n-2,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
@@ -44,7 +45,7 @@ function trackedDisbursedActual(m){
  return m.budgets.filter(b=>b.paid&&b.weeklyEnabled).reduce((sum,b)=>sum+Object.values(m.weeks||{}).reduce((n,rec)=>n+weeklyUsed(b,rec),0),0);
 }
 function trackedRemaining(m){return trackedDisbursedActual(m)-actual(m);}
-function validMonthKey(k){return typeof k==='string'&&/^\\d{4}-(0[1-9]|1[0-2])$/.test(k);}
+function validMonthKey(k){return typeof k==='string'&&/^\d{4}-(0[1-9]|1[0-2])$/.test(k);}
 
 function monthName(k){let [y,n]=k.split('-').map(Number);return new Date(y,n-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});}
 function monthWeekRanges(key){
@@ -65,7 +66,7 @@ function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;',
 function iconFor(n){let s=n.toLowerCase();if(s.includes('infak'))return 'volunteer_activism';if(s.includes('hp')||s.includes('cicilan'))return 'smartphone';if(s.includes('umi')||s.includes('mifta')||s.includes('aulia')||s.includes('keluarga'))return 'family_restroom';if(s.includes('pasangan')||s.includes('jajan'))return 'favorite';if(s.includes('bensin'))return 'local_gas_station';if(s.includes('cartridge')||s.includes('liquid'))return 'water_drop';if(s.includes('kuota'))return 'wifi';if(s.includes('kopi')||s.includes('air'))return 'coffee';if(s.includes('rumah'))return 'home';return 'category';}
 function render(){
  const m=current(),alloc=totalBudget(m),out=actual(m);
- $('monthTitle').textContent=monthName(month);$('monthStatus').textContent=m.status==='submitted'?'✓ Anggaran tersimpan':'● Draft anggaran';$('monthStatus').className='month-status '+(m.status==='submitted'?'is-submitted':'is-draft');$('submitBudget').textContent=m.status==='submitted'?'✓ Sudah disubmit':'Submit anggaran';$('submitBudget').disabled=m.status==='submitted';$('freeMoney').textContent=fmt(m.income-alloc);$('income').textContent=fmt(m.income);$('allocated').textContent=fmt(alloc);$('paidTotal').textContent=fmt(paidActual(m));$('budgetTotal').textContent=fmt(alloc);$('budgetCount').textContent=m.budgets.length+' pos';
+ $('monthTitle').textContent=monthName(month);$('draftNextMonth').textContent='＋ Buat '+monthName(nextMonthKey(month)).replace(/\s+\d{4}$/,'');$('draftNextMonth').title='Salin seluruh rencana '+monthName(month)+' ke '+monthName(nextMonthKey(month));$('monthStatus').textContent=m.status==='submitted'?'✓ Anggaran tersimpan':'● Draft anggaran';$('monthStatus').className='month-status '+(m.status==='submitted'?'is-submitted':'is-draft');$('submitBudget').textContent=m.status==='submitted'?'✓ Sudah disubmit':'Submit anggaran';$('submitBudget').disabled=m.status==='submitted';$('freeMoney').textContent=fmt(m.income-alloc);$('income').textContent=fmt(m.income);$('allocated').textContent=fmt(alloc);$('paidTotal').textContent=fmt(paidActual(m));$('budgetTotal').textContent=fmt(alloc);$('budgetCount').textContent=m.budgets.length+' pos';
  $('cashNeed').textContent=fmt(m.budgets.filter(b=>b.paymentMode==='cash'&&!b.paid).reduce((a,b)=>a+(+b.amount||0),0));$('budgetState').textContent=m.submitted?'✓ Anggaran tersimpan':'Belum disubmit';
  $('budgetList').innerHTML=m.budgets.map(b=>`<div class="budget-row"><div class="budget-name"><span class="budget-icon material-symbols-rounded">${iconFor(b.name)}</span><span><strong>${escapeHtml(b.name)}</strong><small>${b.paid?'Sudah terlaksana':'Belum terlaksana'} · ${b.paymentMode==='cash'?'Cash':'Cashless'}${b.weeklyEnabled?' · Mingguan '+fmt(b.weeklyAmount):''}</small></span></div><div class="budget-amount"><b>${fmt(b.amount)}</b><small><input class="paid-toggle" type="checkbox" aria-label="Tandai ${escapeHtml(b.name)} sudah terlaksana" ${b.paid?'checked':''} onchange="togglePaid('${b.id}',this.checked)"> ${b.paid?'Selesai':'Tandai selesai'}</small></div></div>`).join('');
  renderWeeklySections(m);
@@ -152,17 +153,21 @@ $('prevMonth').onclick=()=>shiftMonth(-1);$('nextMonth').onclick=()=>shiftMonth(
 function shiftMonth(n){let [y,m]=month.split('-').map(Number),d=new Date(y,m-1+n,1);month=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;week=1;persist();}
 
 function createNextMonthDraft(){
- const source=current(),targetKey=nextMonthKey(month);
- if(state.months[targetKey]){alert('Draft '+monthName(targetKey)+' sudah tersedia. Buka melalui Riwayat agar data yang ada tidak tertimpa.');return;}
+ const sourceKey=month,source=current(),targetKey=nextMonthKey(sourceKey);
+ if(state.months[targetKey]){alert('Anggaran '+monthName(targetKey)+' sudah tersedia. Buka melalui Riwayat agar data yang sudah ada tidak tertimpa.');return;}
+ // Copy the planning inputs (including monthly income, category names/amounts,
+ // payment modes and monitoring preferences) into the following use-month.
  const copied=clone(source);
  copied.budgets=copied.budgets.map(b=>({...b,id:uid(),paid:false}));
- copied.weeks={};copied.balances=(source.balances||[]).map(b=>({...b,amount:0}));
- copied.submitted=false;copied.status='draft';copied.budgetPeriod=targetKey;
+ copied.weeks={};
+ copied.balances=(source.balances||[]).map(b=>({...b,amount:0}));
+ copied.submitted=false;copied.status='draft';copied.budgetPeriod=targetKey;copied.copiedFromMonth=sourceKey;
  delete copied.submittedAt;
  const count=monthWeekRanges(targetKey).length;
  copied.budgets.forEach(b=>{if(b.weeklyEnabled)b.weeklyAmount=Math.round((Number(b.amount)||0)/count);});
- copied.weekCount=count;state.months[targetKey]=copied;month=targetKey;week=1;persist();
- alert('Draft '+monthName(targetKey)+' berhasil dibuat. Kategori dan nominal disalin; transaksi, status pembayaran, dan saldo aktual direset.');
+ copied.weekCount=count;
+ state.months[targetKey]=copied;month=targetKey;week=1;persist();
+ alert('Anggaran '+monthName(targetKey)+' berhasil disiapkan dari '+monthName(sourceKey)+'. Pemasukan, nama pos, nominal, metode pembayaran, dan pengaturan monitoring disalin. Checklist, catatan mingguan, dan saldo aktual direset.');
 }
 $('newMonth').onclick=()=>{let v=prompt('Bulan baru (format YYYY-MM), contoh 2026-12');if(!v||!/^\d{4}-\d{2}$/.test(v))return;if(state.months[v]){alert('Bulan sudah ada. Buka melalui Riwayat.');return;}let prev=clone(current());prev.weeks={};prev.budgets.forEach(b=>{b.id=uid();b.paid=false;});prev.submitted=false;prev.status='draft';delete prev.submittedAt;prev.balances=[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}];state.months[v]=prev;month=v;week=1;persist();};
 $('draftNextMonth')?.addEventListener('click',createNextMonthDraft);

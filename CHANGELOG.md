@@ -31,3 +31,11 @@ This is a candidate build. Test with a separate test user in the existing Supaba
 - Added `Draft bulan berikutnya` action. It copies budget categories and settings into the next month while resetting weekly records, paid flags, and actual balances.
 - Refined dark-mode palette, surface contrast, chart colors, grid lines, and calendar states.
 - Replaced application icons with a minimal wallet-calendar checkmark identity.
+
+
+## Budget-in V4.1 — Blue brand & forward-month planning
+- Replaced the previous app identity with the approved blue Budget-in monogram icon across PWA/app surfaces.
+- Updated PWA theme colors and service-worker cache namespace to V4.1.
+- New installations now open on the next calendar month, so the first plan is forward-looking. Existing saved active months are preserved.
+- The next-month action now names its target month and explicitly copies monthly income, category names and amounts, payment methods, and weekly-monitoring preferences.
+- The new target month starts as a draft; paid flags, weekly actual records, and actual balance amounts are reset. Existing target months are never overwritten.

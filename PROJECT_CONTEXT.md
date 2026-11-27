@@ -41,3 +41,11 @@
 - Calendar monitoring periods run Monday through Sunday; the first and last periods may be partial.
 - Weekly recommended allowance is monthly category amount divided by the number of calendar periods, rounded to whole rupiah.
 - Editing budget settings recalculates recommendations for enabled weekly categories.
+
+
+## V4.1 forward-month planning clarification
+- For a new installation, the active planning month defaults to the next calendar month. Existing saved active-month selections are preserved.
+- The next-month copy action copies the current selected month as a template into the following month.
+- Copied fields: monthly income, category names and amounts, payment methods, and weekly-monitoring settings.
+- Reset fields: paid flags, weekly actual records, submitted state, and actual balance amounts.
+- Existing destination months are not overwritten.

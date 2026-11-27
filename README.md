@@ -1,33 +1,26 @@
-# Budget-in V4.0
+# Budget-in V4.1
 
-Budget-in is a personal-finance PWA hosted on GitHub Pages. Supabase provides authentication and per-user monthly budget storage.
+Personal-finance PWA using HTML, CSS, vanilla JavaScript, GitHub Pages, and the existing Supabase project.
+
+## Deploy
+1. Back up production data first.
+2. Keep `config.js` connected to the existing Supabase project; do not replace its URL or publishable key. Never add a service-role key.
+3. Upload the contents of this folder to the repository root.
+4. Commit and wait for GitHub Pages.
+5. Reopen the app and allow the V4.1 service worker cache to activate.
+6. Test authentication, sync, monthly history, weekly records, backup/restore, and multi-device refresh using a separate test account before production use.
+
+## Forward-month planning
+- A new installation opens on the next calendar month. Existing saved active-month selections remain unchanged.
+- The button `Buat [bulan berikutnya]` copies the selected month's income, budget category names and amounts, payment methods, and weekly-monitoring preferences into the next month.
+- The new month is a draft. Paid checkboxes, weekly actuals, and actual balance amounts reset.
+- Existing destination months are never overwritten.
+
+## Financial definitions
+- Allocated budget: planned category amounts.
+- Disbursed funds: categories marked as paid.
+- Actual spending: weekly recorded expenses only.
+- The monthly paid checkbox is not added to actual spending.
 
 ## Files
-- `index.html` — application shell
-- `styles.css` — responsive UI, themes, motion
-- `app.js` — financial logic, local-first rendering, Supabase sync
-- `config.js` — existing Supabase URL and publishable key
-- `sw.js` — service worker
-- `manifest.webmanifest` — PWA metadata
-- `schema.sql` — reference schema; do not rerun during normal deployment
-- `icon-192.png`, `icon-512.png` — app icons
-
-## V4.0 financial definitions
-- Allocated budget: planned category amounts.
-- Disbursed funds: sum of categories whose monthly checkbox is checked.
-- Actual spending: sum of weekly recorded expenses only.
-- Weekly monitoring remains selective. Historical entries remain counted when monitoring is disabled.
-
-## Deployment
-1. Download a fresh backup from the currently deployed application.
-2. Test this candidate build using a separate test account in the existing Supabase project.
-3. Confirm login, cloud sync, weekly records, monthly history, restore, and multi-device refresh.
-4. Replace repository root files with the contents of this folder.
-5. Commit and wait for GitHub Pages deployment.
-6. Reopen the PWA and verify the new service worker cache.
-7. Keep the previous V3.8 commit available for rollback.
-
-## Security
-- The frontend publishable key is intended for browser use when RLS is correctly configured.
-- Never commit a Supabase secret/service-role key.
-- Keep user-specific financial values out of public source defaults.
+`index.html`, `styles.css`, `app.js`, `config.js`, `sw.js`, `manifest.webmanifest`, `icon-192.png`, `icon-512.png`, and `schema.sql`.

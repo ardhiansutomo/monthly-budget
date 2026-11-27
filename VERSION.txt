@@ -1,3 +1,4 @@
-Budget-in V4.2
-Build: Blue B Wallet Identity, Premium Light/Dark UI, iPhone Safe-Area Responsive & Forward-Month Planning
-Release status: Candidate build; live Supabase and device acceptance testing required.
+Budget-in V4.3
+Build: Exact User-Supplied Wallet Logo + PWA Brand Asset Refresh
+Base: V4.2 (forward-month planning, blue themes, responsive/iOS safe areas, motion)
+Release status: Candidate build; live Supabase and real-device acceptance testing required.

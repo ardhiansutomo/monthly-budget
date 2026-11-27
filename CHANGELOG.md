@@ -1,34 +1,21 @@
-# Budget-in V4.2 — Brand, Responsive UI & Planning Polish
+# Budget-in V4.3 — Exact Logo Asset Update
 
-## Brand identity
-- Replaced the previous generic wallet mark with the user's selected Budget-in B-wallet monogram.
-- Updated PWA icons (192×192 and 512×512), header branding, and authentication branding.
-- Unified the visual identity around deep navy, vivid blue, and light blue.
+## Logo (user-approved exact source)
+- Replaced the previous app icon assets with the wallet mark cropped directly from the exact image supplied for V4.3.
+- Preserved the original uploaded logo image unchanged as `brand-mark-source.png`.
+- Updated PWA launcher icons (192×192 and 512×512) and added 32×32 and 64×64 browser favicons.
+- Header and sign-in logo references now use the updated icon assets; Budget-in text remains alongside the mark for legibility.
+- No logo was redrawn, reinterpreted, or regenerated.
 
-## Light and dark themes
-- Refined light mode with clearer contrast, brighter blue actions, cleaner surfaces, and consistent shadows.
-- Refined dark mode with layered navy surfaces, improved text contrast, blue focus states, and coordinated chart colors.
-- Preserved the theme toggle and local theme preference.
+## PWA
+- Updated the service-worker cache namespace to `budget-in-v4.3-cache`.
+- Added the original logo source and favicon assets to the precache list.
+- Updated the document title and manifest metadata for V4.3.
 
-## Responsive and iOS
-- Added safe-area handling for iPhone notch, Dynamic Island, and home indicator.
-- Kept the viewport-fit=cover configuration and adjusted sticky header, bottom navigation, dialogs, and authentication overlay.
-- Added compact layouts for 390px-and-smaller screens, including iPhone 14 and iPhone 14 Pro widths.
-- Improved long budget names, amount columns, and action-button wrapping to prevent horizontal overflow.
-
-## Forward-month planning
-- The next-month action now clearly says “Salin ke [bulan]”.
-- Copies monthly income, all category names and amounts, payment modes, and weekly-monitoring settings.
-- Resets paid checkboxes, weekly actual records, and actual balances for the target month.
-- Existing target months are never overwritten; the action offers to open the existing month instead.
-- New installations continue to start with the next calendar month.
-
-## Motion and accessibility
-- Added restrained transitions and entrance motion.
-- Preserved `prefers-reduced-motion`.
-- Added consistent visible keyboard focus styles.
-
-## Preserved
-- Existing Supabase URL, publishable key, authentication, password recovery, Realtime, and monthly budget schema.
-- Existing local-first storage and V3.x legacy data normalization.
-- Financial definitions: disbursement and weekly actual spending remain separate.
+## Preserved from V4.2
+- Blue light and dark visual systems.
+- Responsive desktop, tablet, and mobile layouts.
+- iPhone notch, Dynamic Island, and home-indicator safe-area support.
+- Reduced-motion accessibility behavior.
+- Forward-month budget planning and safe reset of actual-use fields.
+- Supabase authentication, password recovery, Realtime, and existing database schema.

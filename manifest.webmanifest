@@ -1,11 +1,11 @@
 {
   "name": "Budget-in — Personal Finance",
   "short_name": "Budget-in",
-  "description": "Rencanakan anggaran bulan depan, atur nominal, dan pantau pengeluaran dengan Budget-in.",
+  "description": "Rencanakan anggaran bulan depan dan pantau pengeluaran dengan Budget-in.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f3f7ff",
+  "background_color": "#ffffff",
   "theme_color": "#10264a",
   "icons": [
     {

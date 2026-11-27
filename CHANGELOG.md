@@ -1,41 +1,34 @@
-# Budget-in V4.0 — Financial Engine & Experience Modernization
+# Budget-in V4.2 — Brand, Responsive UI & Planning Polish
 
-## Added
-- Separated monthly disbursement status from actual weekly spending.
-- Actual spending now comes from recorded weekly entries only.
-- Weekly history remains included in actuals when monitoring is later disabled.
-- Added stricter month-key validation for new month creation.
-- Added safer restore validation, pre-restore safety download, and sequential cloud upload of restored months.
-- Added motion and interaction polish with reduced-motion support.
-- Updated service worker cache namespace to V4.0.
+## Brand identity
+- Replaced the previous generic wallet mark with the user's selected Budget-in B-wallet monogram.
+- Updated PWA icons (192×192 and 512×512), header branding, and authentication branding.
+- Unified the visual identity around deep navy, vivid blue, and light blue.
+
+## Light and dark themes
+- Refined light mode with clearer contrast, brighter blue actions, cleaner surfaces, and consistent shadows.
+- Refined dark mode with layered navy surfaces, improved text contrast, blue focus states, and coordinated chart colors.
+- Preserved the theme toggle and local theme preference.
+
+## Responsive and iOS
+- Added safe-area handling for iPhone notch, Dynamic Island, and home indicator.
+- Kept the viewport-fit=cover configuration and adjusted sticky header, bottom navigation, dialogs, and authentication overlay.
+- Added compact layouts for 390px-and-smaller screens, including iPhone 14 and iPhone 14 Pro widths.
+- Improved long budget names, amount columns, and action-button wrapping to prevent horizontal overflow.
+
+## Forward-month planning
+- The next-month action now clearly says “Salin ke [bulan]”.
+- Copies monthly income, all category names and amounts, payment modes, and weekly-monitoring settings.
+- Resets paid checkboxes, weekly actual records, and actual balances for the target month.
+- Existing target months are never overwritten; the action offers to open the existing month instead.
+- New installations continue to start with the next calendar month.
+
+## Motion and accessibility
+- Added restrained transitions and entrance motion.
+- Preserved `prefers-reduced-motion`.
+- Added consistent visible keyboard focus styles.
 
 ## Preserved
-- Existing Supabase project configuration and monthly_budgets schema.
-- Existing authentication, password recovery, Realtime, and local-first UI architecture.
-- Existing V3.8 stored month structure and legacy weekly fields.
-
-## Important
-This is a candidate build. Test with a separate test user in the existing Supabase project before replacing production files.
-
-## Visual modernization pass
-- Rebuilt the visual token layer for a more consistent premium finance dashboard.
-- Refined desktop sidebar, wide-screen dashboard grid, mobile spacing, cards, forms, charts, and navigation.
-- Improved dark-mode surfaces and contrast using shared design tokens.
-- Added restrained hover, elevation, entrance, and press interactions.
-- Preserved reduced-motion accessibility support.
-
-## Salary Cycle & Calendar Monitoring update
-- Added calendar-derived weekly periods using Monday-to-Sunday weeks with partial periods at month boundaries.
-- Added selectable calendar week chips and date ranges in weekly monitoring.
-- Submitting or editing a budget recalculates weekly recommended allowance from each enabled category's monthly amount and the number of calendar periods.
-- Added `Draft bulan berikutnya` action. It copies budget categories and settings into the next month while resetting weekly records, paid flags, and actual balances.
-- Refined dark-mode palette, surface contrast, chart colors, grid lines, and calendar states.
-- Replaced application icons with a minimal wallet-calendar checkmark identity.
-
-
-## Budget-in V4.1 — Blue brand & forward-month planning
-- Replaced the previous app identity with the approved blue Budget-in monogram icon across PWA/app surfaces.
-- Updated PWA theme colors and service-worker cache namespace to V4.1.
-- New installations now open on the next calendar month, so the first plan is forward-looking. Existing saved active months are preserved.
-- The next-month action now names its target month and explicitly copies monthly income, category names and amounts, payment methods, and weekly-monitoring preferences.
-- The new target month starts as a draft; paid flags, weekly actual records, and actual balance amounts are reset. Existing target months are never overwritten.
+- Existing Supabase URL, publishable key, authentication, password recovery, Realtime, and monthly budget schema.
+- Existing local-first storage and V3.x legacy data normalization.
+- Financial definitions: disbursement and weekly actual spending remain separate.

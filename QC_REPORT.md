@@ -1,48 +1,30 @@
-# Budget-in V4.0 — QC Report
+# Budget-in V4.2 — Quality Check Report
 
-## Static checks
-- JavaScript syntax: pending execution in this environment.
-- HTML references: reviewed against repository filenames.
-- Manifest: copied unchanged from V3.8.
-- Supabase schema: unchanged; no migration included.
-- Service worker cache: bumped to `budget-in-v4.0-cache`.
+## Passed static checks
+- JavaScript syntax check (`node --check app.js`): passed.
+- Service worker JavaScript syntax check (`node --check sw.js`): passed.
+- CSS parser check including nested media-rule declarations: 0 parse errors.
+- HTML parser check: passed.
+- PWA manifest JSON parse: passed.
+- Required app-shell assets referenced by the service worker are present.
+- Supabase `config.js` and `schema.sql` are retained from the supplied project files.
 
-## Implemented checks
-- Monthly paid checkbox is excluded from actual spending calculation.
-- Weekly actuals include persisted entries even after monitoring is disabled.
-- New month key validation checks month range 01–12.
-- Restore validates JSON shape and each month, downloads a pre-restore safety snapshot, then uploads restored months sequentially when cloud is active. Cloud-only rows are intentionally not deleted.
-- Reduced-motion preference is respected.
+## Reviewed implementation
+- Header and sign-in brand use the selected navy B-wallet monogram.
+- PWA icon assets are 192×192 and 512×512.
+- Light and dark design tokens are coordinated around the blue brand.
+- iOS viewport-fit, safe-area top inset, safe-area bottom inset, sticky mobile header, and bottom navigation are retained/refined.
+- Small-screen rules cover 390px-and-below widths, including common iPhone 14 and iPhone 14 Pro CSS viewport widths.
+- Reduced-motion preferences are respected.
+- Next-month action copies income, budget category names, amounts, payment modes, and weekly-monitoring preferences.
+- New draft resets paid flags, weekly records, and actual balance amounts.
+- Existing target month is not overwritten; user can choose to open it.
 
-## Not yet verified
-- Live Supabase authentication and cloud writes.
-- Restore against production account.
-- Realtime across devices.
-- iOS/Android installed PWA behavior.
-- Accessibility audit and Core Web Vitals.
-- Financial reconciliation against user's real monthly records.
+## Not verified in this environment
+- Live Supabase login, writes, Realtime, and cross-device sync.
+- Real-device rendering on iPhone 14 / 14 Pro, including installed PWA mode and Dynamic Island.
+- Browser interaction and financial reconciliation with production records.
+- GitHub Pages deployment and service-worker activation.
 
 ## Release status
-Candidate build only. Do not replace production until acceptance tests pass.
-
-## Visual modernization checks
-- CSS parsed with tinycss2: 0 syntax errors.
-- Existing HTML structure and event IDs preserved.
-- Responsive breakpoints reviewed for desktop, tablet, and mobile.
-- Dark mode uses shared theme tokens and explicit component overrides.
-- Visual regression on real browsers/devices remains pending.
-
-## Salary-cycle/calendar checks
-- December 2026 resolves to five periods: 1–6, 7–13, 14–20, 21–27, and 28–31 December.
-- Weekly selector and history cards now render the calculated period count rather than a fixed four weeks.
-- Draft-next-month action avoids overwriting an existing month and resets actual-use fields.
-- Dark-mode chart and surface tokens updated.
-- Browser-level UI interaction, Supabase write behavior, and multi-device acceptance tests remain pending.
-
-
-## V4.1 checks
-- Blue app icon generated from the user-approved Budget-in B monogram and resized to 192px and 512px.
-- PWA manifest and service-worker cache namespace updated.
-- New-install default planning month is computed dynamically as the next calendar month; saved active months are preserved.
-- Next-month draft copies income and all budget setup fields, resets actual-use fields, and refuses to overwrite an existing destination.
-- JavaScript syntax and package contents require final automated checks before deployment. Live Supabase acceptance testing remains required.
+Candidate build only. Back up production data and run acceptance tests with a separate test account before replacing production files.

@@ -1,3 +1,3 @@
-Budget-in V4.1
-Build: Blue Brand & Forward-Month Budget Planning
-Release status: Candidate build; production acceptance testing required.
+Budget-in V4.2
+Build: Blue B Wallet Identity, Premium Light/Dark UI, iPhone Safe-Area Responsive & Forward-Month Planning
+Release status: Candidate build; live Supabase and device acceptance testing required.

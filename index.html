@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1e3b">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#10264a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
@@ -12,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Budget-in">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Budget-in V4.1 — Personal Finance</title>
+<title>Budget-in V4.2 — Personal Finance</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -57,7 +56,10 @@
 </section>
 <div class="app-shell" id="appShell">
 <header class="topbar">
-  <a class="brand" href="#" aria-label="Budget-in home"><span class="brand-icon brand-budgetin" aria-hidden="true"><img src="icon-192.png" alt=""></span><span><b>Budget-in</b></span></a>
+  <a class="brand" href="#" aria-label="Budget-in home">
+    <span class="brand-icon brand-budgetin" aria-hidden="true"><img src="icon-192.png" alt=""></span>
+    <span class="brand-copy"><b>Budget-in</b><small>Personal Finance Space</small></span>
+  </a>
   <div class="top-actions"><span id="syncStatus" class="sync-status">Offline</span><button class="round-btn account-btn" id="accountBtn" aria-label="Akun dan keluar" title="Akun / Keluar"><span class="material-symbols-rounded" aria-hidden="true">account_circle</span></button><button class="round-btn refresh-btn" id="refreshBtn" aria-label="Refresh data" title="Refresh data dari cloud"><span id="refreshIcon" class="material-symbols-rounded" aria-hidden="true">sync</span></button><button class="round-btn theme-toggle" id="themeToggle" aria-label="Ganti tema" title="Ganti tema"><span id="themeIcon" class="material-symbols-rounded">dark_mode</span></button><button class="round-btn" id="backupBtn" aria-label="Backup data" title="Backup data"><span class="material-symbols-rounded">cloud_upload</span></button></div>
 </header>
 <main class="main">
@@ -85,7 +87,7 @@
   </section>
 
   <section class="section-block" id="budgetSection">
-    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Rancang anggaran untuk bulan tujuan sebelum bulan dimulai. Salin rencana bulan sebelumnya agar lebih cepat.</p></div><div class="heading-actions"><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button><button class="small-action draft-next-btn" id="draftNextMonth" type="button">＋ Buat bulan berikutnya</button><button class="primary-btn submit-budget-btn" id="submitBudget">Submit anggaran</button></div></div>
+    <div class="section-heading"><div><span class="eyebrow">PLAN YOUR MONTH</span><h2>Anggaran bulanan</h2><p>Susun rencana bulan depan sebelum gajian berganti. Salin seluruh nominal dari bulan sebelumnya, lalu sesuaikan.</p></div><div class="heading-actions"><button class="small-action" id="editBudget">Edit anggaran <span>↗</span></button><button class="small-action draft-next-btn" id="draftNextMonth" type="button">＋ Salin ke bulan berikutnya</button><button class="primary-btn submit-budget-btn" id="submitBudget">Submit anggaran</button></div></div>
     <div class="surface budget-surface"><div id="budgetList"></div><div class="budget-footer"><span>Total anggaran</span><b id="budgetTotal">Rp0</b></div><div class="cash-summary"><div><span>Uang tunai yang perlu disiapkan</span><b id="cashNeed">Rp0</b></div><small id="budgetState">Belum disubmit</small></div></div>
   </section>
 

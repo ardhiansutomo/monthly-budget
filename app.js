@@ -66,7 +66,10 @@ function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;',
 function iconFor(n){let s=n.toLowerCase();if(s.includes('infak'))return 'volunteer_activism';if(s.includes('hp')||s.includes('cicilan'))return 'smartphone';if(s.includes('umi')||s.includes('mifta')||s.includes('aulia')||s.includes('keluarga'))return 'family_restroom';if(s.includes('pasangan')||s.includes('jajan'))return 'favorite';if(s.includes('bensin'))return 'local_gas_station';if(s.includes('cartridge')||s.includes('liquid'))return 'water_drop';if(s.includes('kuota'))return 'wifi';if(s.includes('kopi')||s.includes('air'))return 'coffee';if(s.includes('rumah'))return 'home';return 'category';}
 function render(){
  const m=current(),alloc=totalBudget(m),out=actual(m);
- $('monthTitle').textContent=monthName(month);$('draftNextMonth').textContent='＋ Buat '+monthName(nextMonthKey(month)).replace(/\s+\d{4}$/,'');$('draftNextMonth').title='Salin seluruh rencana '+monthName(month)+' ke '+monthName(nextMonthKey(month));$('monthStatus').textContent=m.status==='submitted'?'✓ Anggaran tersimpan':'● Draft anggaran';$('monthStatus').className='month-status '+(m.status==='submitted'?'is-submitted':'is-draft');$('submitBudget').textContent=m.status==='submitted'?'✓ Sudah disubmit':'Submit anggaran';$('submitBudget').disabled=m.status==='submitted';$('freeMoney').textContent=fmt(m.income-alloc);$('income').textContent=fmt(m.income);$('allocated').textContent=fmt(alloc);$('paidTotal').textContent=fmt(paidActual(m));$('budgetTotal').textContent=fmt(alloc);$('budgetCount').textContent=m.budgets.length+' pos';
+ $('monthTitle').textContent=monthName(month);
+ const targetMonthKey=nextMonthKey(month),targetExists=!!state.months[targetMonthKey];
+ $('draftNextMonth').textContent=(targetExists?'↗ Buka ':'＋ Salin ke ')+monthName(targetMonthKey).replace(/\s+\d{4}$/,'');
+ $('draftNextMonth').title=targetExists?'Buka anggaran '+monthName(targetMonthKey):'Salin pemasukan, semua nama pos, nominal, metode pembayaran, dan pengaturan mingguan dari '+monthName(month)+' ke '+monthName(targetMonthKey);$('monthStatus').textContent=m.status==='submitted'?'✓ Anggaran tersimpan':'● Draft anggaran';$('monthStatus').className='month-status '+(m.status==='submitted'?'is-submitted':'is-draft');$('submitBudget').textContent=m.status==='submitted'?'✓ Sudah disubmit':'Submit anggaran';$('submitBudget').disabled=m.status==='submitted';$('freeMoney').textContent=fmt(m.income-alloc);$('income').textContent=fmt(m.income);$('allocated').textContent=fmt(alloc);$('paidTotal').textContent=fmt(paidActual(m));$('budgetTotal').textContent=fmt(alloc);$('budgetCount').textContent=m.budgets.length+' pos';
  $('cashNeed').textContent=fmt(m.budgets.filter(b=>b.paymentMode==='cash'&&!b.paid).reduce((a,b)=>a+(+b.amount||0),0));$('budgetState').textContent=m.submitted?'✓ Anggaran tersimpan':'Belum disubmit';
  $('budgetList').innerHTML=m.budgets.map(b=>`<div class="budget-row"><div class="budget-name"><span class="budget-icon material-symbols-rounded">${iconFor(b.name)}</span><span><strong>${escapeHtml(b.name)}</strong><small>${b.paid?'Sudah terlaksana':'Belum terlaksana'} · ${b.paymentMode==='cash'?'Cash':'Cashless'}${b.weeklyEnabled?' · Mingguan '+fmt(b.weeklyAmount):''}</small></span></div><div class="budget-amount"><b>${fmt(b.amount)}</b><small><input class="paid-toggle" type="checkbox" aria-label="Tandai ${escapeHtml(b.name)} sudah terlaksana" ${b.paid?'checked':''} onchange="togglePaid('${b.id}',this.checked)"> ${b.paid?'Selesai':'Tandai selesai'}</small></div></div>`).join('');
  renderWeeklySections(m);
@@ -154,7 +157,12 @@ function shiftMonth(n){let [y,m]=month.split('-').map(Number),d=new Date(y,m-1+n
 
 function createNextMonthDraft(){
  const sourceKey=month,source=current(),targetKey=nextMonthKey(sourceKey);
- if(state.months[targetKey]){alert('Anggaran '+monthName(targetKey)+' sudah tersedia. Buka melalui Riwayat agar data yang sudah ada tidak tertimpa.');return;}
+ if(state.months[targetKey]){
+  if(confirm('Anggaran '+monthName(targetKey)+' sudah tersedia. Buka anggaran tersebut tanpa menimpa data yang ada?')){
+   month=targetKey;week=1;persist();window.scrollTo({top:0,behavior:'smooth'});
+  }
+  return;
+ }
  // Copy the planning inputs (including monthly income, category names/amounts,
  // payment modes and monitoring preferences) into the following use-month.
  const copied=clone(source);
@@ -167,7 +175,7 @@ function createNextMonthDraft(){
  copied.budgets.forEach(b=>{if(b.weeklyEnabled)b.weeklyAmount=Math.round((Number(b.amount)||0)/count);});
  copied.weekCount=count;
  state.months[targetKey]=copied;month=targetKey;week=1;persist();
- alert('Anggaran '+monthName(targetKey)+' berhasil disiapkan dari '+monthName(sourceKey)+'. Pemasukan, nama pos, nominal, metode pembayaran, dan pengaturan monitoring disalin. Checklist, catatan mingguan, dan saldo aktual direset.');
+ alert('Anggaran '+monthName(targetKey)+' berhasil disiapkan dari '+monthName(sourceKey)+'. Seluruh pemasukan dan nominal pos disalin. Metode pembayaran serta pengaturan monitoring mingguan dipertahankan. Checklist, catatan pengeluaran mingguan, dan saldo aktual direset.');
 }
 $('newMonth').onclick=()=>{let v=prompt('Bulan baru (format YYYY-MM), contoh 2026-12');if(!v||!/^\d{4}-\d{2}$/.test(v))return;if(state.months[v]){alert('Bulan sudah ada. Buka melalui Riwayat.');return;}let prev=clone(current());prev.weeks={};prev.budgets.forEach(b=>{b.id=uid();b.paid=false;});prev.submitted=false;prev.status='draft';delete prev.submittedAt;prev.balances=[{name:'Rekening',amount:0},{name:'Tunai',amount:0},{name:'Di pasangan',amount:0}];state.months[v]=prev;month=v;week=1;persist();};
 $('draftNextMonth')?.addEventListener('click',createNextMonthDraft);
@@ -217,7 +225,7 @@ $('modalBody').addEventListener('change',async e=>{
 $('dismissHint').onclick=()=>{$('installHint').remove();localStorage.setItem('budgetin_install_dismissed','1');};if(localStorage.getItem('budgetin_install_dismissed'))$('installHint').remove();
 if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true){$('installHint')?.remove();}
 document.querySelectorAll('.bottom-nav a').forEach(a=>a.addEventListener('click',()=>{document.querySelectorAll('.bottom-nav a').forEach(x=>x.classList.remove('active'));a.classList.add('active');}));
-const THEME_KEY='mymoney_theme_v1';function applyTheme(t){document.documentElement.dataset.theme=t;localStorage.setItem(THEME_KEY,t);let icon=$('themeIcon');if(icon)icon.textContent=t==='dark'?'light_mode':'dark_mode';let meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t==='dark'?'#0c1422':'#101f3d';}
+const THEME_KEY='mymoney_theme_v1';function applyTheme(t){document.documentElement.dataset.theme=t;localStorage.setItem(THEME_KEY,t);let icon=$('themeIcon');if(icon)icon.textContent=t==='dark'?'light_mode':'dark_mode';let meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t==='dark'?'#071426':'#10264a';}
 applyTheme(localStorage.getItem(THEME_KEY)||'light');$('themeToggle')?.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 
